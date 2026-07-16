@@ -40,6 +40,12 @@ dependencies {
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.material)
+    // KTX untuk Activity (memungkinkan sintaks 'by viewModels()')
+    implementation("androidx.activity:activity-ktx:1.8.2")
+
+    // KTX untuk ViewModel dan LiveData
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)

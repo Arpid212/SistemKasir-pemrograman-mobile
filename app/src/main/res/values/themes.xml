@@ -6,4 +6,7 @@
     </style>
 
     <style name="Theme.SistemKasir" parent="Base.Theme.SistemKasir" />
+    <style name="ShapeAppearanceOverlay.App.CornerSize10Percent" parent="">
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>
