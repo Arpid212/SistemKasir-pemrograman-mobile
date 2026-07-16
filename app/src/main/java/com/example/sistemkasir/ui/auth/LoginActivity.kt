@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sistemkasir.R
+import com.example.sistemkasir.ui.admin.DashboardAdminActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -82,14 +84,12 @@ class LoginActivity : AppCompatActivity() {
     private fun arahkanBerdasarkanRole(role: String) {
         when (role) {
             "Admin" -> {
-                // val intent = Intent(this, DashboardAdminActivity::class.java)
-                // startActivity(intent)
-                // finish()
+               val intent = Intent(this, DashboardAdminActivity::class.java)
+                startActivity(intent)
+                finish()
             }
             "Kasir" -> {
-                // val intent = Intent(this, DashboardKasirActivity::class.java)
-                // startActivity(intent)
-                // finish()
+//                val intent =Intent(this, )
             }
             else -> {
                 Toast.makeText(this, "Role tidak valid!", Toast.LENGTH_SHORT).show()
