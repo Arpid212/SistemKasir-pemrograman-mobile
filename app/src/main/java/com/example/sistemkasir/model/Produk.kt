@@ -1,13 +1,19 @@
 package com.example.sistemkasir.model
 
-
 data class Produk(
-    val id: Int = 0,
-    val nama: String,
-    val harga: Double,
-    val deskripsi: String,
-    val stok: Int,
-    val foto: String, // Bisa berupa URL atau path gambar lokal
-    val kategori: String // Berisi "Kopi", "Non-Kopi", atau "Makanan"
-)
 
+    var id: Int = 0,
+
+    var nama: String = "",
+
+    var harga: Double = 0.0,
+
+    var deskripsi: String = "",
+
+    var stok: Int = 0,
+
+    var foto: String = "",
+
+    var kategori: String = ""
+
+)

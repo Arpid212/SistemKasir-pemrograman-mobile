@@ -2,76 +2,59 @@ package com.example.sistemkasir.ui.admin
 
 import android.os.Bundle
 import android.widget.Button
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.Fragment
 import com.example.sistemkasir.R
-import com.google.firebase.firestore.FirebaseFirestore
-
-
+import com.example.sistemkasir.ui.admin.fragment.DashboardFragment
+import com.example.sistemkasir.ui.admin.fragment.KasirFragment
+import com.example.sistemkasir.ui.admin.fragment.LaporanFragment
+import com.example.sistemkasir.ui.admin.fragment.ProdukFragment
 
 class DashboardAdminActivity : AppCompatActivity() {
 
-    private lateinit var productName: EditText
-    private lateinit var productPrice: EditText
-    private lateinit var productCategory: Spinner
-    private lateinit var productDesc: EditText
-    private lateinit var productStock: EditText
-
+    private lateinit var txtJudul: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard_admin)
 
-        productName = findViewById<EditText>(R.id.productName)
-        productPrice = findViewById<EditText>(R.id.productPrice)
-        productCategory = findViewById<Spinner>(R.id.productCategory)
-        productDesc = findViewById<EditText>(R.id.productDesc)
-        productStock = findViewById<EditText>(R.id.productStock)
+        txtJudul = findViewById(R.id.txtJudul)
 
-        findViewById<Button>(R.id.validButton).setOnClickListener {
-            val name = productName.text.toString()
-            val price= productPrice.text.toString()
-            val category = productCategory.selectedItem.toString()
-            val desc = productDesc.text.toString()
-            val stock = productStock.text.toString()
+        val btnDashboard = findViewById<Button>(R.id.btnDashboard)
+        val btnProduk = findViewById<Button>(R.id.btnProduk)
+        val btnLaporan = findViewById<Button>(R.id.btnLaporan)
+        val btnKasir = findViewById<Button>(R.id.btnKasir)
 
-            if (name.isNotEmpty() && price.isNotEmpty() && category.isNotEmpty() && desc.isNotEmpty() && stock.isNotEmpty()){
-                val hargaAngka = price.toDoubleOrNull() ?: 0.0
-                val jumlahStock = stock.toIntOrNull()
-
-                val dataKirim = hashMapOf(
-                    "nama" to name,
-                    "harga" to hargaAngka,
-                    "kategori" to category,
-                    "deskripsi" to desc,
-                    "stok" to jumlahStock,
-                    "foto" to "" // Dikosongkan sementara foto
-                )
-
-                FirebaseFirestore.getInstance().collection("Produk")
-                    .document().set(dataKirim)
-                    .addOnSuccessListener {
-                        Toast.makeText(this, "Produk berhasil ditambahkan!", Toast.LENGTH_SHORT).show()
-                        productName.text.clear()
-                        productPrice.text.clear()
-                        productDesc.text.clear()
-                        productStock.text.clear()
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "Gagal menyimpan: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-
-            }else {
-                Toast.makeText(this, "Harap isi semua kolom!", Toast.LENGTH_SHORT).show()
-            }
+        btnDashboard.setOnClickListener {
+            txtJudul.text = "Dashboard"
+            replaceFragment(DashboardFragment())
         }
 
+        btnProduk.setOnClickListener {
+            txtJudul.text = "Manajemen Menu"
+            replaceFragment(ProdukFragment())
+        }
+
+        btnLaporan.setOnClickListener {
+            txtJudul.text = "Laporan"
+            replaceFragment(LaporanFragment())
+        }
+
+        btnKasir.setOnClickListener {
+            txtJudul.text = "Manajemen Kasir"
+            replaceFragment(KasirFragment())
+        }
+
+        if (savedInstanceState == null) {
+            txtJudul.text = "Dashboard"
+            replaceFragment(DashboardFragment())
+        }
+    }
+
+    private fun replaceFragment(fragment: Fragment) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, fragment)
+            .commit()
     }
 }

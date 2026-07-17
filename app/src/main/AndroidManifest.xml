@@ -15,34 +15,46 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SistemKasir">
-
         <activity
             android:name=".ui.admin.DashboardAdminActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.kasir.DashboardKasirActivity"
             android:exported="false" />
-
         <activity
             android:name=".ui.kasir.CheckoutActivity"
             android:exported="false" />
-
-        <activity android:name=".ui.kasir.CheckoutTunaiActivity"
+        <activity
+            android:name=".ui.kasir.CheckoutTunaiActivity"
             android:exported="false" />
+        <activity
+            android:name=".ui.admin.activity.TambahProdukActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.admin.activity.EditProdukActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.admin.activity.TambahKasirActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".ui.admin.activity.EditKasirActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 
