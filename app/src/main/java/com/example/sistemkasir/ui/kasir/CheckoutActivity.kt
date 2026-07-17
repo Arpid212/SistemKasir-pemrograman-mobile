@@ -3,7 +3,9 @@ package com.example.sistemkasir.ui.kasir
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout // Tambahan import
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -29,33 +31,41 @@ class CheckoutActivity : AppCompatActivity() {
         val rvKeranjang = findViewById<RecyclerView>(R.id.rvKeranjangCheckout)
         val btnLanjut = findViewById<Button>(R.id.btnLanjutCheckout)
 
+        // KODE BARU: Menggunakan Layout Pembayaran (bukan tombol QRIS yang error)
+        val layoutPaymentMethod = findViewById<LinearLayout>(R.id.layoutPaymentMethod)
+
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // 1. Tangkap array dasar dari Intent
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
 
-        // 2. Rakit kembali menjadi list pesanan
         val listPesanan = arrayListOf<ItemKeranjang>()
         for (i in listNama.indices) {
-            // Buat objek produk buatan dari data yang diterima
             val produk = Produk(nama = listNama[i], harga = listHarga[i])
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 
-        // 3. Masukkan ke adapter
         adapter = KeranjangAdapter(listPesanan)
         rvKeranjang.layoutManager = LinearLayoutManager(this)
         rvKeranjang.adapter = adapter
 
         hitungRincianBiaya(listPesanan)
 
+        // Klik tombol Lanjut (Otomatis ke halaman Tunai)
         btnLanjut.setOnClickListener {
-            // Melempar HANYA total akhir (tipe data Double biasa) ke halaman Tunai
             val intentTunai = Intent(this, CheckoutTunaiActivity::class.java)
             intentTunai.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
             startActivity(intentTunai)
+        }
+
+        // KODE BARU: Klik baris Metode Pembayaran
+        layoutPaymentMethod.setOnClickListener {
+            // Karena belum ada halaman QRIS, kita munculkan pop-up ini saja dulu
+            Toast.makeText(this, "Pilihan pembayaran QRIS akan segera dikembangkan", Toast.LENGTH_SHORT).show()
+
+            // Nanti jika ingin dibuat halamannya, Anda bisa menambahkan pop-up dialog di sini
+            // untuk memilih "Tunai" atau "QRIS".
         }
     }
 

@@ -64,7 +64,7 @@ class DashboardKasirActivity : AppCompatActivity() {
 
     // 4. Fungsi baru untuk menyedot data dari Firebase secara Real-time
     private fun pantauDataDariAdmin() {
-        db.collection("produk").addSnapshotListener { snapshots, error ->
+        db.collection("Produk").addSnapshotListener { snapshots, error ->
             if (error != null) return@addSnapshotListener
 
             val listProdukDariDatabase = arrayListOf<Produk>()
