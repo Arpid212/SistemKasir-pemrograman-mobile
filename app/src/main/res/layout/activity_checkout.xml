@@ -24,6 +24,7 @@
         android:padding="16dp"
         android:background="@color/surface_white"
         android:layout_marginTop="8dp"
+        android:gravity="center_vertical"
         app:layout_constraintTop_toBottomOf="@id/toolbarCheckout">
 
         <TextView
@@ -35,14 +36,21 @@
             android:textStyle="bold"
             android:textColor="@color/text_primary"/>
 
+        <!-- Teks Tunai / QRIS -->
         <TextView
             android:id="@+id/tvMetodePembayaran"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Tunai"
             android:textColor="@color/text_primary"
-            android:drawableEnd="@drawable/ic_arrow_right"
-            android:drawablePadding="8dp"/>
+            android:layout_marginEnd="12dp"/>
+
+        <!-- Ikon Panah ke Kanan -->
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_arrow_right"
+            app:tint="@color/text_secondary" />
     </LinearLayout>
 
     <LinearLayout

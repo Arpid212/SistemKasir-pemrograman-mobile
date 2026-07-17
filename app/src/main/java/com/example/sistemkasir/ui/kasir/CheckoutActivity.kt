@@ -3,9 +3,9 @@ package com.example.sistemkasir.ui.kasir
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
-import android.widget.LinearLayout // Tambahan import
+import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AlertDialog // Tambahan untuk memunculkan kotak pilihan
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +23,9 @@ class CheckoutActivity : AppCompatActivity() {
     private val PAJAK_PERSEN = 0.10
     private var totalAkhirBelanja = 0.0
 
+    // 1. Variabel memori untuk mengingat pilihan kasir
+    private var metodeTerpilih = "Tunai"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout)
@@ -30,9 +33,10 @@ class CheckoutActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbarCheckout)
         val rvKeranjang = findViewById<RecyclerView>(R.id.rvKeranjangCheckout)
         val btnLanjut = findViewById<Button>(R.id.btnLanjutCheckout)
-
-        // KODE BARU: Menggunakan Layout Pembayaran (bukan tombol QRIS yang error)
         val layoutPaymentMethod = findViewById<LinearLayout>(R.id.layoutPaymentMethod)
+
+        // 2. Mengambil teks "Tunai" di ujung kanan baris pembayaran
+        val tvMetodePembayaran = findViewById<TextView>(R.id.tvMetodePembayaran)
 
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
@@ -52,20 +56,31 @@ class CheckoutActivity : AppCompatActivity() {
 
         hitungRincianBiaya(listPesanan)
 
-        // Klik tombol Lanjut (Otomatis ke halaman Tunai)
-        btnLanjut.setOnClickListener {
-            val intentTunai = Intent(this, CheckoutTunaiActivity::class.java)
-            intentTunai.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
-            startActivity(intentTunai)
+        // 3. Logika saat baris PEMBAYARAN diklik (Memunculkan Kotak Pilihan)
+        layoutPaymentMethod.setOnClickListener {
+            val daftarPilihan = arrayOf("Tunai", "QRIS")
+
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Pilih Metode Pembayaran")
+            builder.setItems(daftarPilihan) { _, urutanPilihan ->
+                // Mengubah teks di layar sesuai yang diklik
+                metodeTerpilih = daftarPilihan[urutanPilihan]
+                tvMetodePembayaran.text = metodeTerpilih
+            }
+            builder.show()
         }
 
-        // KODE BARU: Klik baris Metode Pembayaran
-        layoutPaymentMethod.setOnClickListener {
-            // Karena belum ada halaman QRIS, kita munculkan pop-up ini saja dulu
-            Toast.makeText(this, "Pilihan pembayaran QRIS akan segera dikembangkan", Toast.LENGTH_SHORT).show()
-
-            // Nanti jika ingin dibuat halamannya, Anda bisa menambahkan pop-up dialog di sini
-            // untuk memilih "Tunai" atau "QRIS".
+        // 4. Logika tombol LANJUT (Akan mengecek kasir pilih apa)
+        btnLanjut.setOnClickListener {
+            if (metodeTerpilih == "Tunai") {
+                val intent = Intent(this, CheckoutTunaiActivity::class.java)
+                intent.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
+                startActivity(intent)
+            } else {
+                val intent = Intent(this, CheckoutQrisActivity::class.java)
+                intent.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
+                startActivity(intent)
+            }
         }
     }
 
@@ -74,12 +89,10 @@ class CheckoutActivity : AppCompatActivity() {
         for (item in keranjang) {
             subtotal += (item.produk.harga * item.kuantitas)
         }
-
         val pajak = subtotal * PAJAK_PERSEN
         totalAkhirBelanja = subtotal + pajak
 
         val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-
         findViewById<TextView>(R.id.tvLabelSubtotal).text = "Subtotal (${keranjang.size})"
         findViewById<TextView>(R.id.tvNilaiSubtotal).text = formatRupiah.format(subtotal).replace("Rp", "Rp ")
         findViewById<TextView>(R.id.tvNilaiPajak).text = formatRupiah.format(pajak).replace("Rp", "Rp ")
