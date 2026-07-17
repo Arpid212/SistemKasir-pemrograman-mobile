@@ -14,8 +14,6 @@ import java.util.Locale
 
 class CheckoutTunaiActivity : AppCompatActivity() {
 
-    private var totalTagihan: Double = 48000.0 // Simulasi total yang dilempar dari halaman sebelumnya
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout_tunai)
@@ -28,10 +26,12 @@ class CheckoutTunaiActivity : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
+        // Tangkap tipe data dasar (Double)
+        val totalTagihan = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
+
         val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
         tvTotalBayar.text = formatRupiah.format(totalTagihan).replace("Rp", "Rp ")
 
-        // Logika Hitung Otomatis saat kasir mengetik
         etNominalBayar.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
@@ -55,9 +55,5 @@ class CheckoutTunaiActivity : AppCompatActivity() {
                 }
             }
         })
-
-        btnCetakStruk.setOnClickListener {
-            // TODO: Pindah ke Halaman Cetak Struk
-        }
     }
 }
