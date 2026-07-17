@@ -43,8 +43,8 @@ class LoginActivity : AppCompatActivity() {
 //            }
 //        }
         tombolMasuk.setOnClickListener {
-            //startActivity(Intent(this, DashboardAdminActivity::class.java))
-            startActivity(Intent(this, DashboardKasirActivity::class.java))
+            startActivity(Intent(this, DashboardAdminActivity::class.java))
+            //startActivity(Intent(this, DashboardKasirActivity::class.java))
             finish()
         }
     }

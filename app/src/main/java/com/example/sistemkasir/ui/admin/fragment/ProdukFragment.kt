@@ -1,22 +1,27 @@
 package com.example.sistemkasir.ui.admin.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.Toast
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.ArrayAdapter
+import android.widget.TextView
+
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+
 import com.example.sistemkasir.R
 import com.example.sistemkasir.model.Produk
 import com.example.sistemkasir.ui.admin.adapter.ProdukAdapter
+
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.firestore.FirebaseFirestore
-import android.app.AlertDialog
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Button
 
 class ProdukFragment : Fragment() {
 
@@ -37,6 +42,7 @@ class ProdukFragment : Fragment() {
 
         initView(view)
         initRecyclerView()
+
         loadProduk()
 
         btnTambah.setOnClickListener {
@@ -47,13 +53,16 @@ class ProdukFragment : Fragment() {
     }
 
     private fun initView(view: View) {
+
         rvProduk = view.findViewById(R.id.rvProduk)
         btnTambah = view.findViewById(R.id.btnTambahProduk)
+
     }
 
     private fun initRecyclerView() {
 
         adapter = ProdukAdapter(
+
             listProduk,
 
             onEdit = { produk ->
@@ -68,6 +77,7 @@ class ProdukFragment : Fragment() {
 
         rvProduk.layoutManager = LinearLayoutManager(requireContext())
         rvProduk.adapter = adapter
+
     }
 
     private fun loadProduk() {
@@ -89,6 +99,7 @@ class ProdukFragment : Fragment() {
                 adapter.notifyDataSetChanged()
 
             }
+
     }
 
     private fun generateId(onComplete: (Int) -> Unit) {
@@ -125,6 +136,9 @@ class ProdukFragment : Fragment() {
         val edtDeskripsi = dialogView.findViewById<EditText>(R.id.edtDeskripsi)
         val spKategori = dialogView.findViewById<Spinner>(R.id.spKategori)
 
+        val btnSimpan = dialogView.findViewById<MaterialButton>(R.id.btnSimpan)
+        val btnBatal = dialogView.findViewById<TextView>(R.id.btnBatal)
+
         val kategori = arrayOf("Kopi", "Non Kopi")
 
         spKategori.adapter = ArrayAdapter(
@@ -133,81 +147,94 @@ class ProdukFragment : Fragment() {
             kategori
         )
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Tambah Produk")
+        val dialog = AlertDialog.Builder(requireContext())
             .setView(dialogView)
+            .create()
 
-            .setPositiveButton("Simpan") { _, _ ->
+        dialog.show()
 
-                val nama = edtNama.text.toString().trim()
-                val harga = edtHarga.text.toString().trim()
-                val stok = edtStok.text.toString().trim()
-                val deskripsi = edtDeskripsi.text.toString().trim()
-                val kategoriDipilih = spKategori.selectedItem.toString()
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 95 / 100),
+            (resources.displayMetrics.heightPixels * 90 / 100)
+        )
 
-                if (nama.isEmpty() ||
-                    harga.isEmpty() ||
-                    stok.isEmpty() ||
-                    deskripsi.isEmpty()
-                ) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Semua data harus diisi!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
+        btnBatal.setOnClickListener {
+            dialog.dismiss()
+        }
 
-                generateId { idBaru ->
+        btnSimpan.setOnClickListener {
 
-                    val produk = hashMapOf(
+            val nama = edtNama.text.toString().trim()
+            val harga = edtHarga.text.toString().trim()
+            val stok = edtStok.text.toString().trim()
+            val deskripsi = edtDeskripsi.text.toString().trim()
+            val kategoriDipilih = spKategori.selectedItem.toString()
 
-                        "id" to idBaru,
+            if (nama.isEmpty() ||
+                harga.isEmpty() ||
+                stok.isEmpty() ||
+                deskripsi.isEmpty()
+            ) {
 
-                        "nama" to nama,
+                Toast.makeText(
+                    requireContext(),
+                    "Semua data harus diisi!",
+                    Toast.LENGTH_SHORT
+                ).show()
 
-                        "harga" to harga.toDouble(),
+                return@setOnClickListener
+            }
 
-                        "stok" to stok.toInt(),
+            generateId { idBaru ->
 
-                        "deskripsi" to deskripsi,
+                val produk = hashMapOf(
 
-                        "kategori" to kategoriDipilih,
+                    "id" to idBaru,
 
-                        "foto" to ""
+                    "nama" to nama,
 
-                    )
+                    "harga" to harga.toDouble(),
 
-                    db.collection("Produk")
-                        .add(produk)
-                        .addOnSuccessListener {
+                    "stok" to stok.toInt(),
 
-                            Toast.makeText(
-                                requireContext(),
-                                "Produk berhasil ditambahkan",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                    "deskripsi" to deskripsi,
 
-                            loadProduk()
+                    "kategori" to kategoriDipilih,
 
-                        }
-                        .addOnFailureListener {
+                    "foto" to ""
 
-                            Toast.makeText(
-                                requireContext(),
-                                "Gagal menambahkan produk",
-                                Toast.LENGTH_SHORT
-                            ).show()
+                )
 
-                        }
+                db.collection("Produk")
+                    .add(produk)
 
-                }
+                    .addOnSuccessListener {
+
+                        Toast.makeText(
+                            requireContext(),
+                            "Produk berhasil ditambahkan",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        dialog.dismiss()
+
+                        loadProduk()
+
+                    }
+
+                    .addOnFailureListener {
+
+                        Toast.makeText(
+                            requireContext(),
+                            "Gagal menambahkan produk",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                    }
 
             }
 
-            .setNegativeButton("Batal", null)
-
-            .show()
+        }
 
     }
 
@@ -328,8 +355,18 @@ class ProdukFragment : Fragment() {
 
             .setNegativeButton("Batal", null)
 
-            .show()
+//            .show()
 
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .create()
+
+        dialog.show()
+
+        dialog.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.95).toInt(),
+            (resources.displayMetrics.heightPixels * 0.90).toInt()
+        )
     }
 
     private fun hapusProduk(produk: Produk) {
@@ -340,29 +377,18 @@ class ProdukFragment : Fragment() {
 
             .setPositiveButton("Hapus") { _, _ ->
 
-                Toast.makeText(
-                    requireContext(),
-                    "Mencari ID = ${produk.id}",
-                    Toast.LENGTH_SHORT
-                ).show()
-
                 db.collection("Produk")
-                    .whereEqualTo("id", produk.id)
+                    .whereEqualTo("nama", produk.nama)
                     .get()
-                    .addOnSuccessListener { documents ->
 
-                        Toast.makeText(
-                            requireContext(),
-                            "Jumlah data ditemukan = ${documents.size()}",
-                            Toast.LENGTH_LONG
-                        ).show()
+                    .addOnSuccessListener { documents ->
 
                         if (documents.isEmpty) {
 
                             Toast.makeText(
                                 requireContext(),
-                                "Data dengan ID ${produk.id} tidak ditemukan!",
-                                Toast.LENGTH_LONG
+                                "Produk tidak ditemukan",
+                                Toast.LENGTH_SHORT
                             ).show()
 
                             return@addOnSuccessListener
@@ -370,15 +396,10 @@ class ProdukFragment : Fragment() {
 
                         val docId = documents.documents[0].id
 
-                        Toast.makeText(
-                            requireContext(),
-                            "Document ID = $docId",
-                            Toast.LENGTH_LONG
-                        ).show()
-
                         db.collection("Produk")
                             .document(docId)
                             .delete()
+
                             .addOnSuccessListener {
 
                                 Toast.makeText(
@@ -390,24 +411,16 @@ class ProdukFragment : Fragment() {
                                 loadProduk()
 
                             }
-                            .addOnFailureListener { e ->
+
+                            .addOnFailureListener {
 
                                 Toast.makeText(
                                     requireContext(),
-                                    "Gagal menghapus: ${e.message}",
-                                    Toast.LENGTH_LONG
+                                    "Gagal menghapus produk",
+                                    Toast.LENGTH_SHORT
                                 ).show()
 
                             }
-
-                    }
-                    .addOnFailureListener { e ->
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Query gagal: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
 
                     }
 
