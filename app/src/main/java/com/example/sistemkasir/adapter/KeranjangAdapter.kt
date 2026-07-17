@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.sistemkasir.R
 import com.example.sistemkasir.model.ItemKeranjang
 import java.text.NumberFormat
@@ -30,6 +31,13 @@ class KeranjangAdapter(
             val totalHargaItem = item.produk.harga * item.kuantitas
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(totalHargaItem).replace("Rp", "Rp ")
+
+            // Load foto menggunakan Glide
+            Glide.with(itemView.context)
+                .load(item.produk.foto)
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .into(imgFoto)
         }
     }
 

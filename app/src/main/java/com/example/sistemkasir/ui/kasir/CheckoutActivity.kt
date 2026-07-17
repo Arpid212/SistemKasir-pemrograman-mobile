@@ -35,12 +35,19 @@ class CheckoutActivity : AppCompatActivity() {
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
+        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf()
+        val listKategori = intent.getStringArrayListExtra("LIST_KATEGORI") ?: arrayListOf()
 
         // 2. Rakit kembali menjadi list pesanan
         val listPesanan = arrayListOf<ItemKeranjang>()
         for (i in listNama.indices) {
             // Buat objek produk buatan dari data yang diterima
-            val produk = Produk(nama = listNama[i], harga = listHarga[i])
+            val produk = Produk(
+                nama = listNama[i],
+                harga = listHarga[i],
+                foto = if (i < listFoto.size) listFoto[i] else "",
+                kategori = if (i < listKategori.size) listKategori[i] else ""
+            )
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 

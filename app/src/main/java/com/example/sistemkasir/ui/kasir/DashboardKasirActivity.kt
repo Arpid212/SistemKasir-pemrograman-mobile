@@ -46,17 +46,23 @@ class DashboardKasirActivity : AppCompatActivity() {
             val listNama = ArrayList<String>()
             val listHarga = ArrayList<Double>()
             val listQty = ArrayList<Int>()
+            val listFoto = ArrayList<String>()
+            val listKategori = ArrayList<String>()
 
             for (item in listKeranjang) {
                 listNama.add(item.produk.nama)
                 listHarga.add(item.produk.harga)
                 listQty.add(item.kuantitas)
+                listFoto.add(item.produk.foto)
+                listKategori.add(item.produk.kategori)
             }
 
             val intent = Intent(this, CheckoutActivity::class.java)
             intent.putStringArrayListExtra("LIST_NAMA", listNama)
             intent.putExtra("LIST_HARGA", listHarga.toDoubleArray())
             intent.putIntegerArrayListExtra("LIST_QTY", listQty)
+            intent.putStringArrayListExtra("LIST_FOTO", listFoto)
+            intent.putStringArrayListExtra("LIST_KATEGORI", listKategori)
 
             startActivity(intent)
         }
@@ -64,7 +70,7 @@ class DashboardKasirActivity : AppCompatActivity() {
 
     // 4. Fungsi baru untuk menyedot data dari Firebase secara Real-time
     private fun pantauDataDariAdmin() {
-        db.collection("produk").addSnapshotListener { snapshots, error ->
+        db.collection("Produk").addSnapshotListener { snapshots, error ->
             if (error != null) return@addSnapshotListener
 
             val listProdukDariDatabase = arrayListOf<Produk>()

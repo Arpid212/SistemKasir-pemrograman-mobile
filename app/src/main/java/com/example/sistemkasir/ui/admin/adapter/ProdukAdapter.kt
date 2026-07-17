@@ -1,66 +1,51 @@
 package com.example.sistemkasir.ui.admin.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sistemkasir.R
+import com.bumptech.glide.Glide
+import com.example.sistemkasir.databinding.ItemProdukBinding
 import com.example.sistemkasir.model.Produk
+import java.text.NumberFormat
+import java.util.Locale
 
+// daftar-nya List<Pair<docId, Produk>> - docId dibawa terus biar edit/hapus
+// gak perlu nyari-nyari lagi ke Firestore
+//
+// Butuh Glide buat load gambar dari URL (tambahkan di app/build.gradle.kts kalau belum ada):
+// implementation("com.github.bumptech.glide:glide:4.16.0")
 class ProdukAdapter(
-    private val listProduk: ArrayList<Produk>,
-    private val onEdit: (Produk) -> Unit,
-    private val onDelete: (Produk) -> Unit
+    private var daftar: List<Pair<String, Produk>>,
+    private val onEdit: (String, Produk) -> Unit,
+    private val onDelete: (String, Produk) -> Unit
 ) : RecyclerView.Adapter<ProdukAdapter.ViewHolder>() {
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-        val txtId: TextView = itemView.findViewById(R.id.txtId)
-        val txtNama: TextView = itemView.findViewById(R.id.txtNama)
-        val txtHarga: TextView = itemView.findViewById(R.id.txtHarga)
-        val txtKategori: TextView = itemView.findViewById(R.id.txtKategori)
-        val txtStok: TextView = itemView.findViewById(R.id.txtStok)
-
-        val btnEdit: Button = itemView.findViewById(R.id.btnEdit)
-        val btnHapus: Button = itemView.findViewById(R.id.btnHapus)
-
-    }
+    inner class ViewHolder(val binding: ItemProdukBinding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_produk, parent, false)
-
-        return ViewHolder(view)
-
-    }
-
-    override fun getItemCount(): Int {
-
-        return listProduk.size
-
+        val binding = ItemProdukBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val (docId, produk) = daftar[position]
+        val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+        holder.binding.tvNama.text = produk.nama
+        holder.binding.tvHarga.text = format.format(produk.harga)
+        holder.binding.tvStok.text = "Stok: ${produk.stok}"
 
-        val produk = listProduk[position]
+        Glide.with(holder.itemView)
+            .load(produk.foto.ifEmpty { null })
+            .into(holder.binding.ivFoto)
 
-        holder.txtId.text = "ID : ${produk.id}"
-        holder.txtNama.text = produk.nama
-        holder.txtHarga.text = "Rp ${produk.harga}"
-        holder.txtKategori.text = "Kategori : ${produk.kategori}"
-        holder.txtStok.text = "Stok : ${produk.stok}"
-
-        holder.btnEdit.setOnClickListener {
-            onEdit(produk)
-        }
-
-        holder.btnHapus.setOnClickListener {
-            onDelete(produk)
-        }
-
+        holder.binding.btnEdit.setOnClickListener { onEdit(docId, produk) }
+        holder.binding.btnHapus.setOnClickListener { onDelete(docId, produk) }
     }
 
+    override fun getItemCount() = daftar.size
+
+    fun updateData(baru: List<Pair<String, Produk>>) {
+        daftar = baru
+        notifyDataSetChanged()
+    }
 }
