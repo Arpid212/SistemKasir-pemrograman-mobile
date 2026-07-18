@@ -5,7 +5,7 @@ object GeneratorUtil {
     fun generateEmail(namaLengkap: String): String{
         val ambilNama = namaLengkap.trim().lowercase()
 
-        val kata = ambilNama.split("")
+        val kata = ambilNama.split(" ")
 
         val namaDepan = kata.first().take(3)
         val namaAkhir = kata.last().take(3)

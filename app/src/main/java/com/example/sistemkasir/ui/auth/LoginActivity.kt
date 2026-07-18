@@ -32,7 +32,7 @@ class LoginActivity : AppCompatActivity() {
         val inputPin = findViewById<EditText>(R.id.inputPin)
         val tombolMasuk = findViewById<Button>(R.id.tombolMasuk)
 
-        // Aksi ketika tombol ditekan (Logika Asli Diaktifkan)
+//        // Aksi ketika tombol ditekan (Logika Asli Diaktifkan)
         tombolMasuk.setOnClickListener {
             val email = inputEmail.text.toString().trim()
             val pin = inputPin.text.toString().trim()

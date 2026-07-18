@@ -1,136 +1,200 @@
 package com.example.sistemkasir.ui.admin.fragment
 
 import android.app.AlertDialog
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.example.sistemkasir.R
-import com.example.sistemkasir.ui.auth.LoginActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sistemkasir.databinding.DialogKasirBinding
+import com.example.sistemkasir.databinding.FragmentKasirBinding
+import com.example.sistemkasir.model.Pengguna
+import com.example.sistemkasir.ui.admin.adapter.KasirAdapter
 import com.example.sistemkasir.utils.GeneratorUtil
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
+// Pola sama persis kayak ProdukFragment: 1 dialog buat Tambah & Update.
+// Bedanya sama Produk: pas Tambah, email & PIN digenerate otomatis (gak diinput
+// manual), dan pas Update cuma NAMA yang bisa diubah - email/PIN dikunci karena
+// itu kredensial login yang sudah dipakai kasir.
 class KasirFragment : Fragment() {
 
-    // Wajib ada untuk Fragment agar layout fragment_kasir.xml bisa ditampilkan
+    private var _binding: FragmentKasirBinding? = null
+    private val binding get() = _binding!!
+    private val db = FirebaseFirestore.getInstance()
+    private lateinit var adapter: KasirAdapter
+
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_kasir, container, false)
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentKasirBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+        adapter = KasirAdapter(
+            emptyList(),
+            onEdit = { docId, pengguna -> tampilkanDialog(docId, pengguna) },
+            onDelete = { docId, pengguna -> hapus(docId, pengguna) }
+        )
+        binding.rvKasir.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvKasir.adapter = adapter
 
-        // Hubungkan tombol tambah kasir dari fragment_kasir.xml
-        // Pastikan ID-nya sesuai dengan yang ada di layout XML Anda
-        val btnTambahKasir = view.findViewById<Button>(R.id.btnTambahKasir)
-        btnTambahKasir?.setOnClickListener {
-            tampilkanDialogTambahKasir()
-        }
-
-        // TODO: Inisialisasi RecyclerView untuk menampilkan daftar kasir di sini
+        muatKasir()
+        binding.btnTambahPegawai.setOnClickListener { tampilkanDialog() }
     }
 
-    private fun tampilkanDialogTambahKasir() {
-        // Jika nama file Anda dialog_kasir.xml, ubah menjadi seperti ini:
-        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_kasir, null)
+    // role di Firestore pakai kapital "Kasir" (konvensi dari LoginActivity Arvid)
+    private fun muatKasir() {
+        db.collection("Pengguna").whereEqualTo("role", "Kasir")
+            .addSnapshotListener { snapshot, _ ->
+                val list = snapshot?.documents?.map { doc ->
+                    doc.id to Pengguna(
+                        id = 0,
+                        nama = doc.getString("nama") ?: "",
+                        email = doc.getString("email") ?: "",
+                        pin = doc.getString("pin") ?: "",
+                        role = doc.getString("role") ?: "Kasir"
+                    )
+                } ?: emptyList()
+                adapter.updateData(list)
+            }
+    }
+
+    private fun tampilkanDialog(docId: String? = null, penggunaLama: Pengguna? = null) {
+        val form = DialogKasirBinding.inflate(layoutInflater)
+        val modeEdit = docId != null
+
+        form.edtNama.setText(penggunaLama?.nama ?: "")
+
+        // Email & PIN cuma ditampilkan (read-only) pas mode edit, gak ada pas nambah baru
+        if (modeEdit) {
+            form.groupKredensial.visibility = View.VISIBLE
+            form.tvEmail.text = "Email: ${penggunaLama?.email}"
+            form.tvPin.text = "PIN: ${penggunaLama?.pin}"
+        } else {
+            form.groupKredensial.visibility = View.GONE
+        }
+
+        form.btnSimpan.text = if (modeEdit) "SIMPAN DATA PEGAWAI" else "TAMBAHKAN PEGAWAI"
+
         val dialog = AlertDialog.Builder(requireContext())
-            .setView(dialogView)
-            .setCancelable(false)
+            .setTitle(if (modeEdit) "Update Pegawai" else "Tambahkan Pegawai")
+            .setView(form.root)
+            .setNegativeButton("Batal", null)
             .create()
 
-        val inputNama = dialogView.findViewById<EditText>(R.id.inputNamaLengkap)
-        val btnBatal = dialogView.findViewById<Button>(R.id.btnBatal)
-        val btnSimpan = dialogView.findViewById<Button>(R.id.btnSimpan)
+        form.btnSimpan.setOnClickListener {
+            val nama = form.edtNama.text.toString().trim()
+            if (nama.isEmpty()) {
+                Toast.makeText(requireContext(), "Nama lengkap wajib diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-        btnBatal.setOnClickListener {
-            dialog.dismiss()
-        }
-
-        btnSimpan.setOnClickListener {
-            val namaLengkap = inputNama.text.toString().trim()
-
-            if (namaLengkap.isNotEmpty()) {
-                dialog.dismiss()
-                prosesPembuatanAkun(namaLengkap)
+            if (!modeEdit) {
+                simpanKasirBaru(nama, dialog)
             } else {
-                Toast.makeText(requireContext(), "Nama lengkap harus diisi!", Toast.LENGTH_SHORT).show()
+                updateNamaKasir(docId!!, nama, dialog)
             }
         }
-
         dialog.show()
     }
 
-    private fun prosesPembuatanAkun(namaLengkap: String) {
-        val emailBaru = GeneratorUtil.generateEmail(namaLengkap)
-        val pinBaru = GeneratorUtil.generatePin()
-
-        FirebaseAuth.getInstance().createUserWithEmailAndPassword(emailBaru, pinBaru)
-            .addOnCompleteListener { task ->
-                // PERBAIKAN: Cek apakah fragment masih aktif sebelum update UI
-                if (!isAdded) return@addOnCompleteListener
-
-                if (task.isSuccessful) {
-                    simpanKeFirestore(namaLengkap, emailBaru, pinBaru)
+    // Cek dulu berdasarkan NAMA (bukan email) - kalau sudah ada nama yang sama,
+    // tanya dulu ke admin: ini orang yang sama (salah klik/typo) atau memang
+    // 2 orang beda nama sama? Kalau lanjut, email dibedakan otomatis pakai angka.
+    private fun simpanKasirBaru(nama: String, dialog: AlertDialog) {
+        db.collection("Pengguna").whereEqualTo("nama", nama).get()
+            .addOnSuccessListener { hasilNama ->
+                if (!hasilNama.isEmpty) {
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Nama sudah terdaftar")
+                        .setMessage("Sudah ada kasir bernama \"$nama\".")
+                        .setPositiveButton("Buat dengan email yang berbeda") { _, _ ->
+                            lanjutkanSimpanKasir(nama, dialog)
+                        }
+                        .setNegativeButton("Batal", null)
+                        .show()
                 } else {
-                    Toast.makeText(requireContext(), "Gagal buat akun Auth: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    lanjutkanSimpanKasir(nama, dialog)
                 }
             }
+            .addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Gagal cek nama: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    private fun simpanKeFirestore(namaLengkap: String, emailBaru: String, pinBaru: String) {
-        val dataKasir = hashMapOf(
-            "name" to namaLengkap,
-            "email" to emailBaru,
-            "pin" to pinBaru,
-            "role" to "Kasir"
-        )
+    private fun lanjutkanSimpanKasir(nama: String, dialog: AlertDialog) {
+        val emailDasar = GeneratorUtil.generateEmail(nama)
+        val pin = GeneratorUtil.generatePin()
 
-        FirebaseFirestore.getInstance().collection("Pengguna")
-            .add(dataKasir)
+        cariEmailUnik(emailDasar, 0) { emailUnik ->
+            val data = hashMapOf<String, Any>(
+                "nama" to nama, "email" to emailUnik, "pin" to pin, "role" to "Kasir"
+            )
+            db.collection("Pengguna").add(data)
+                .addOnSuccessListener {
+                    dialog.dismiss()
+                    tampilkanKredensial(emailUnik, pin)
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(requireContext(), "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    // Cek email ke Firestore satu-satu: budisan@kafe.com sudah dipakai? coba
+    // budisan1@kafe.com, masih dipakai? coba budisan2@kafe.com, dst sampai ketemu yang bebas.
+    private fun cariEmailUnik(emailDasar: String, percobaan: Int, onFound: (String) -> Unit) {
+        val emailDicoba = if (percobaan == 0) {
+            emailDasar
+        } else {
+            val bagianDepan = emailDasar.substringBefore("@")
+            val domain = emailDasar.substringAfter("@")
+            "$bagianDepan$percobaan@$domain"
+        }
+
+        db.collection("Pengguna").whereEqualTo("email", emailDicoba).get()
+            .addOnSuccessListener { hasil ->
+                if (hasil.isEmpty) onFound(emailDicoba)
+                else cariEmailUnik(emailDasar, percobaan + 1, onFound)
+            }
+            .addOnFailureListener { onFound(emailDicoba) }
+    }
+
+    private fun updateNamaKasir(docId: String, nama: String, dialog: AlertDialog) {
+        db.collection("Pengguna").document(docId).update("nama", nama)
             .addOnSuccessListener {
-                // PERBAIKAN: Cek apakah fragment masih aktif
-                if (!isAdded) return@addOnSuccessListener
-
-                tampilkanInfoAkunSukses(namaLengkap, emailBaru, pinBaru)
+                Toast.makeText(requireContext(), "Berhasil disimpan", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
             }
             .addOnFailureListener { e ->
-                // PERBAIKAN: Cek apakah fragment masih aktif
-                if (!isAdded) return@addOnFailureListener
-
-                Toast.makeText(requireContext(), "Gagal simpan database: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 
-    private fun tampilkanInfoAkunSukses(nama: String, email: String, pin: String) {
+    private fun tampilkanKredensial(email: String, pin: String) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Kasir Berhasil Ditambahkan!")
-            .setMessage("Serahkan data ini kepada Kasir:\n\nNama: $nama\nEmail: $email\nPIN: $pin")
-            .setPositiveButton("Tutup & Relogin") { dialog, _ ->
-                dialog.dismiss()
-                kembaliKeLogin()
-            }
+            .setTitle("Akun kasir berhasil dibuat")
+            .setMessage("Email: $email\nPIN: $pin\n\nSampaikan kredensial ini ke kasir yang bersangkutan.")
+            .setPositiveButton("OK", null)
+            .setCancelable(false)
             .show()
     }
 
-    private fun kembaliKeLogin() {
-        FirebaseAuth.getInstance().signOut()
+    private fun hapus(docId: String, pengguna: Pengguna) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Hapus Akun Kasir")
+            .setMessage("Yakin hapus akun \"${pengguna.nama}\"?")
+            .setPositiveButton("Hapus") { _, _ -> db.collection("Pengguna").document(docId).delete() }
+            .setNegativeButton("Batal", null)
+            .show()
+    }
 
-        val sharedPref = requireActivity().getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
-        sharedPref.edit().clear().apply()
-
-        val intent = Intent(requireContext(), LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        requireActivity().finish()
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
