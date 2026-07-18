@@ -15,6 +15,9 @@ import com.example.sistemkasir.model.Produk
 import com.example.sistemkasir.ui.admin.adapter.ProdukAdapter
 import com.google.firebase.firestore.FirebaseFirestore
 
+// VERSI FALLBACK - tanpa Firebase Storage. Foto pakai input URL manual
+// (edtFoto). Gak nambah dependency baru sama sekali, aman kalau internet
+// buat resolve Storage lagi bermasalah.
 class ProdukFragment : Fragment() {
 
     private var _binding: FragmentProdukBinding? = null
@@ -43,10 +46,6 @@ class ProdukFragment : Fragment() {
         binding.btnTambahProduk.setOnClickListener { tampilkanDialog() }
     }
 
-    // Ambil semua produk sekali jalan. docId disimpan BARENG produknya (Pair),
-    // jadi pas edit/hapus gak perlu query ulang cari docId - ini yang bikin
-    // kode GPT panjang tadi (query "whereEqualTo nama" 2x, plus rawan salah
-    // kalau ada 2 produk namanya sama).
     private fun muatProduk() {
         db.collection("Produk").addSnapshotListener { snapshot, _ ->
             val list = snapshot?.documents?.map { doc ->
@@ -61,11 +60,8 @@ class ProdukFragment : Fragment() {
             } ?: emptyList()
             adapter.updateData(list)
         }
-        // (Manual seperti ini, bukan document.toObject(Produk::class.java), karena
-        // model Produk belum ada default value di semua field - toObject() bisa crash)
     }
 
-    // Satu fungsi buat Tambah DAN Edit. Kalau docId == null -> mode tambah.
     private fun tampilkanDialog(docId: String? = null, produkLama: Produk? = null) {
         val form = DialogProdukBinding.inflate(layoutInflater)
         form.spKategori.adapter = ArrayAdapter(
