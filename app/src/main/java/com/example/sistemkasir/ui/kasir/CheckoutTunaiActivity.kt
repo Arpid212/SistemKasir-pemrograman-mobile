@@ -7,12 +7,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
 import com.example.sistemkasir.R
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.firebase.firestore.FirebaseFirestore
 import java.text.NumberFormat
 import java.util.Locale
 
 class CheckoutTunaiActivity : AppCompatActivity() {
+    private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,5 +58,70 @@ class CheckoutTunaiActivity : AppCompatActivity() {
                 }
             }
         })
+        btnCetakStruk.setOnClickListener {
+            val bayar = etNominalBayar.text.toString().toDoubleOrNull() ?: 0.0
+            simpanTransaksiKeFirestore(totalTagihan, bayar)
+        }
+    }
+    private fun simpanTransaksiKeFirestore(totalTagihan: Double, bayar: Double) {
+        val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
+        val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
+        val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
+
+        val rincianPesanan = arrayListOf<Map<String, Any>>()
+        for (i in listNama.indices) {
+            rincianPesanan.add(
+                mapOf(
+                    "nama" to listNama[i],
+                    "harga" to listHarga[i],
+                    "kuantitas" to listQty[i]
+                )
+            )
+        }
+
+        val dataTransaksi = hashMapOf(
+            "waktu_transaksi" to com.google.firebase.Timestamp.now(),
+            "metode_pembayaran" to "Tunai",
+            "total_tagihan" to totalTagihan,
+            "nominal_bayar" to bayar,
+            "kembalian" to (bayar - totalTagihan),
+            "rincian" to rincianPesanan,
+            "nama_kasir" to "Kasir Aktif"
+        )
+
+        db.collection("Transaksi")
+            .add(dataTransaksi)
+            .addOnSuccessListener {
+
+                // PERBAIKAN: Format teks struk dan kirim ke Printer Bluetooth
+                val struk = StringBuilder()
+                struk.append("==== NAMA TOKO ANDA ====\n")
+                struk.append("Kasir: Kasir Aktif\n")
+                struk.append("------------------------\n")
+
+                for (i in listNama.indices) {
+                    val namaProduk = listNama[i]
+                    val qtyTerbeli = listQty[i]
+
+                    db.collection("Produk")
+                        .whereEqualTo("nama", namaProduk)
+                        .get()
+                        .addOnSuccessListener { hasilPencarian ->
+                            for (dokumen in hasilPencarian) {
+                                val stokSekarang = dokumen.getLong("stok") ?: 0
+                                val stokBaru = stokSekarang - qtyTerbeli
+
+                                // Memperbarui stok langsung ke referensi ID dokumennya
+                                dokumen.reference.update("stok", stokBaru)
+                            }
+                        }
+                }
+
+                // Kembali ke Dashboard Kasir dan bersihkan tumpukan halaman (Clear Top)
+                val intent = Intent(this, DashboardKasirActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+                finish()
+            }
     }
 }

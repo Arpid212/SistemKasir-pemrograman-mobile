@@ -42,6 +42,22 @@ class DashboardKasirActivity : AppCompatActivity() {
         // 3. Panggil fungsi untuk memantau data dari Admin
         pantauDataDariAdmin()
 
+        // TODO: Ganti string di bawah dengan MAC Address asli dari printer
+        val macAddressPrinter = "00:11:22:33:44:55"
+
+        Thread {
+            val terhubung = com.example.sistemkasir.utils.PrinterUtil.connectBluetooth(macAddressPrinter)
+
+            // Kembali ke UI Thread untuk menampilkan pesan (Toast)
+            runOnUiThread {
+                if (terhubung) {
+                    android.widget.Toast.makeText(this, "Printer Terhubung", android.widget.Toast.LENGTH_SHORT).show()
+                } else {
+                    android.widget.Toast.makeText(this, "Gagal menghubungkan Printer", android.widget.Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+
         btnCheckout.setOnClickListener {
             val listNama = ArrayList<String>()
             val listHarga = ArrayList<Double>()
