@@ -56,6 +56,11 @@ class CheckoutActivity : AppCompatActivity() {
             // Melempar HANYA total akhir (tipe data Double biasa) ke halaman Tunai
             val intentTunai = Intent(this, CheckoutTunaiActivity::class.java)
             intentTunai.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
+
+            intentTunai.putStringArrayListExtra("LIST_NAMA", listNama)
+            intentTunai.putExtra("LIST_HARGA", listHarga)
+            intentTunai.putIntegerArrayListExtra("LIST_QTY", listQty)
+
             startActivity(intentTunai)
         }
     }
