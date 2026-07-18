@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Warna hitam saat chip diklik/dipilih -->
+    <item android:state_checked="true" android:color="#000000" />
+
+    <!-- Warna abu-abu saat chip tidak dipilih -->
+    <item android:color="#F5F5F5" />
+</selector>
