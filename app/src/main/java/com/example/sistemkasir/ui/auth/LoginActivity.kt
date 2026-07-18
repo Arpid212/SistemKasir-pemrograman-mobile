@@ -31,7 +31,7 @@ class LoginActivity : AppCompatActivity() {
         val inputPin = findViewById<EditText>(R.id.inputPin)
         val tombolMasuk = findViewById<Button>(R.id.tombolMasuk)
 
-//        // Aksi ketika tombol ditekan
+           // Aksi ketika tombol ditekan
 //        tombolMasuk.setOnClickListener {
 //            val email = inputEmail.text.toString().trim()
 //            val pin = inputPin.text.toString().trim()
@@ -42,9 +42,11 @@ class LoginActivity : AppCompatActivity() {
 //                Toast.makeText(this, "Email dan PIN tidak boleh kosong!", Toast.LENGTH_SHORT).show()
 //            }
 //        }
+
+        //UNTUK KEPERLUAN TESTNG TANPA LOGIN
         tombolMasuk.setOnClickListener {
-            //startActivity(Intent(this, DashboardAdminActivity::class.java))
-            startActivity(Intent(this, DashboardKasirActivity::class.java))
+            startActivity(Intent(this, DashboardAdminActivity::class.java))
+            //startActivity(Intent(this, DashboardKasirActivity::class.java))
             finish()
         }
     }

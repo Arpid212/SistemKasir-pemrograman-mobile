@@ -1,422 +1,136 @@
 package com.example.sistemkasir.ui.admin.fragment
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.example.sistemkasir.R
+import com.example.sistemkasir.databinding.DialogProdukBinding
+import com.example.sistemkasir.databinding.FragmentProdukBinding
 import com.example.sistemkasir.model.Produk
 import com.example.sistemkasir.ui.admin.adapter.ProdukAdapter
 import com.google.firebase.firestore.FirebaseFirestore
-import android.app.AlertDialog
-import android.widget.ArrayAdapter
-import android.widget.EditText
-import android.widget.Spinner
-import android.widget.Button
 
 class ProdukFragment : Fragment() {
 
-    private lateinit var rvProduk: RecyclerView
-    private lateinit var btnTambah: Button
-    private lateinit var adapter: ProdukAdapter
-
-    private val listProduk = ArrayList<Produk>()
+    private var _binding: FragmentProdukBinding? = null
+    private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
+    private lateinit var adapter: ProdukAdapter
+    private val kategoriList = arrayOf("Kopi", "Non-Kopi", "Makanan")
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-
-        val view = inflater.inflate(R.layout.fragment_produk, container, false)
-
-        initView(view)
-        initRecyclerView()
-        loadProduk()
-
-        btnTambah.setOnClickListener {
-            showTambahDialog()
-        }
-
-        return view
+        _binding = FragmentProdukBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    private fun initView(view: View) {
-        rvProduk = view.findViewById(R.id.rvProduk)
-        btnTambah = view.findViewById(R.id.btnTambahProduk)
-    }
-
-    private fun initRecyclerView() {
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         adapter = ProdukAdapter(
-            listProduk,
+            emptyList(),
+            onEdit = { docId, produk -> tampilkanDialog(docId, produk) },
+            onDelete = { docId, produk -> hapus(docId, produk) }
+        )
+        binding.rvProduk.layoutManager = LinearLayoutManager(requireContext())
+        binding.rvProduk.adapter = adapter
 
-            onEdit = { produk ->
-                showEditDialog(produk)
-            },
+        muatProduk()
+        binding.btnTambahProduk.setOnClickListener { tampilkanDialog() }
+    }
 
-            onDelete = { produk ->
-                hapusProduk(produk)
-            }
+    // Ambil semua produk sekali jalan. docId disimpan BARENG produknya (Pair),
+    // jadi pas edit/hapus gak perlu query ulang cari docId - ini yang bikin
+    // kode GPT panjang tadi (query "whereEqualTo nama" 2x, plus rawan salah
+    // kalau ada 2 produk namanya sama).
+    private fun muatProduk() {
+        db.collection("Produk").addSnapshotListener { snapshot, _ ->
+            val list = snapshot?.documents?.map { doc ->
+                doc.id to Produk(
+                    nama = doc.getString("nama") ?: "",
+                    harga = doc.getDouble("harga") ?: 0.0,
+                    deskripsi = doc.getString("deskripsi") ?: "",
+                    stok = (doc.getLong("stok") ?: 0).toInt(),
+                    foto = doc.getString("foto") ?: "",
+                    kategori = doc.getString("kategori") ?: ""
+                )
+            } ?: emptyList()
+            adapter.updateData(list)
+        }
+        // (Manual seperti ini, bukan document.toObject(Produk::class.java), karena
+        // model Produk belum ada default value di semua field - toObject() bisa crash)
+    }
 
+    // Satu fungsi buat Tambah DAN Edit. Kalau docId == null -> mode tambah.
+    private fun tampilkanDialog(docId: String? = null, produkLama: Produk? = null) {
+        val form = DialogProdukBinding.inflate(layoutInflater)
+        form.spKategori.adapter = ArrayAdapter(
+            requireContext(), android.R.layout.simple_spinner_dropdown_item, kategoriList
         )
 
-        rvProduk.layoutManager = LinearLayoutManager(requireContext())
-        rvProduk.adapter = adapter
-    }
-
-    private fun loadProduk() {
-
-        db.collection("Produk")
-            .get()
-            .addOnSuccessListener { documents ->
-
-                listProduk.clear()
-
-                for (document in documents) {
-
-                    val produk = document.toObject(Produk::class.java)
-
-                    listProduk.add(produk)
-
-                }
-
-                adapter.notifyDataSetChanged()
-
-            }
-    }
-
-    private fun generateId(onComplete: (Int) -> Unit) {
-
-        db.collection("Produk")
-            .get()
-            .addOnSuccessListener { documents ->
-
-                var maxId = 0
-
-                for (document in documents) {
-
-                    val id = document.getLong("id")?.toInt() ?: 0
-
-                    if (id > maxId) {
-                        maxId = id
-                    }
-
-                }
-
-                onComplete(maxId + 1)
-
-            }
-
-    }
-
-    private fun showTambahDialog() {
-
-        val dialogView = layoutInflater.inflate(R.layout.dialog_produk, null)
-
-        val edtNama = dialogView.findViewById<EditText>(R.id.edtNama)
-        val edtHarga = dialogView.findViewById<EditText>(R.id.edtHarga)
-        val edtStok = dialogView.findViewById<EditText>(R.id.edtStok)
-        val edtDeskripsi = dialogView.findViewById<EditText>(R.id.edtDeskripsi)
-        val spKategori = dialogView.findViewById<Spinner>(R.id.spKategori)
-
-        val kategori = arrayOf("Kopi", "Non Kopi")
-
-        spKategori.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            kategori
-        )
-
-        AlertDialog.Builder(requireContext())
-            .setTitle("Tambah Produk")
-            .setView(dialogView)
-
-            .setPositiveButton("Simpan") { _, _ ->
-
-                val nama = edtNama.text.toString().trim()
-                val harga = edtHarga.text.toString().trim()
-                val stok = edtStok.text.toString().trim()
-                val deskripsi = edtDeskripsi.text.toString().trim()
-                val kategoriDipilih = spKategori.selectedItem.toString()
-
-                if (nama.isEmpty() ||
-                    harga.isEmpty() ||
-                    stok.isEmpty() ||
-                    deskripsi.isEmpty()
-                ) {
-                    Toast.makeText(
-                        requireContext(),
-                        "Semua data harus diisi!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    return@setPositiveButton
-                }
-
-                generateId { idBaru ->
-
-                    val produk = hashMapOf(
-
-                        "id" to idBaru,
-
-                        "nama" to nama,
-
-                        "harga" to harga.toDouble(),
-
-                        "stok" to stok.toInt(),
-
-                        "deskripsi" to deskripsi,
-
-                        "kategori" to kategoriDipilih,
-
-                        "foto" to ""
-
-                    )
-
-                    db.collection("Produk")
-                        .add(produk)
-                        .addOnSuccessListener {
-
-                            Toast.makeText(
-                                requireContext(),
-                                "Produk berhasil ditambahkan",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            loadProduk()
-
-                        }
-                        .addOnFailureListener {
-
-                            Toast.makeText(
-                                requireContext(),
-                                "Gagal menambahkan produk",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                        }
-
-                }
-
-            }
-
-            .setNegativeButton("Batal", null)
-
-            .show()
-
-    }
-
-    private fun showEditDialog(produk: Produk) {
-
-        val dialogView = layoutInflater.inflate(R.layout.dialog_produk, null)
-
-        val edtNama = dialogView.findViewById<EditText>(R.id.edtNama)
-        val edtHarga = dialogView.findViewById<EditText>(R.id.edtHarga)
-        val edtStok = dialogView.findViewById<EditText>(R.id.edtStok)
-        val edtDeskripsi = dialogView.findViewById<EditText>(R.id.edtDeskripsi)
-        val spKategori = dialogView.findViewById<Spinner>(R.id.spKategori)
-
-        val kategori = arrayOf("Kopi", "Non Kopi")
-
-        spKategori.adapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
-            kategori
-        )
-
-        // Isi data lama
-        edtNama.setText(produk.nama)
-        edtHarga.setText(produk.harga.toString())
-        edtStok.setText(produk.stok.toString())
-        edtDeskripsi.setText(produk.deskripsi)
-
-        val posisiKategori = kategori.indexOf(produk.kategori)
-
-        if (posisiKategori != -1) {
-            spKategori.setSelection(posisiKategori)
+        produkLama?.let {
+            form.edtNama.setText(it.nama)
+            form.edtHarga.setText(it.harga.toString())
+            form.edtStok.setText(it.stok.toString())
+            form.edtDeskripsi.setText(it.deskripsi)
+            form.edtFoto.setText(it.foto)
+            form.spKategori.setSelection(kategoriList.indexOf(it.kategori).coerceAtLeast(0))
         }
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Edit Produk")
-            .setView(dialogView)
+        form.btnSimpan.text = if (docId == null) "TAMBAH MENU BARU" else "SIMPAN DATA MENU"
 
-            .setPositiveButton("Simpan") { _, _ ->
+        val dialog = AlertDialog.Builder(requireContext())
+            .setTitle(if (docId == null) "Tambah Produk" else "Edit Produk")
+            .setView(form.root)
+            .setNegativeButton("Batal", null)
+            .create()
 
-                val namaBaru = edtNama.text.toString().trim()
-                val hargaBaru = edtHarga.text.toString().trim()
-                val stokBaru = edtStok.text.toString().trim()
-                val deskripsiBaru = edtDeskripsi.text.toString().trim()
-                val kategoriBaru = spKategori.selectedItem.toString()
+        form.btnSimpan.setOnClickListener {
+            val nama = form.edtNama.text.toString().trim()
+            val harga = form.edtHarga.text.toString().toDoubleOrNull()
+            val stok = form.edtStok.text.toString().toIntOrNull()
+            val deskripsi = form.edtDeskripsi.text.toString().trim()
+            val foto = form.edtFoto.text.toString().trim()
+            val kategori = form.spKategori.selectedItem.toString()
 
-                if (
-                    namaBaru.isEmpty() ||
-                    hargaBaru.isEmpty() ||
-                    stokBaru.isEmpty() ||
-                    deskripsiBaru.isEmpty()
-                ) {
-
-                    Toast.makeText(
-                        requireContext(),
-                        "Semua data harus diisi!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-
-                    return@setPositiveButton
-                }
-
-                val dataBaru = hashMapOf<String, Any>(
-                    "id" to produk.id,
-                    "nama" to namaBaru,
-                    "harga" to hargaBaru.toDouble(),
-                    "stok" to stokBaru.toInt(),
-                    "deskripsi" to deskripsiBaru,
-                    "kategori" to kategoriBaru,
-                    "foto" to ""
-                )
-
-                db.collection("Produk")
-                    .whereEqualTo("nama", produk.nama)
-                    .get()
-                    .addOnSuccessListener { documents ->
-
-                        if (!documents.isEmpty) {
-
-                            val docId = documents.documents[0].id
-
-                            db.collection("Produk")
-                                .document(docId)
-                                .update(dataBaru)
-                                .addOnSuccessListener {
-
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "Produk berhasil diubah",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                    loadProduk()
-
-                                }
-                                .addOnFailureListener {
-
-                                    Toast.makeText(
-                                        requireContext(),
-                                        "Gagal mengubah produk",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-
-                                }
-
-                        } else {
-
-                            Toast.makeText(
-                                requireContext(),
-                                "Produk tidak ditemukan",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                        }
-
-                    }
-
+            if (nama.isEmpty() || harga == null || stok == null) {
+                Toast.makeText(requireContext(), "Lengkapi semua data dengan benar", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
             }
 
-            .setNegativeButton("Batal", null)
+            val data = hashMapOf<String, Any>(
+                "nama" to nama, "harga" to harga, "stok" to stok,
+                "deskripsi" to deskripsi, "kategori" to kategori, "foto" to foto
+            )
 
-            .show()
+            val tugas = if (docId == null) db.collection("Produk").add(data)
+            else db.collection("Produk").document(docId).update(data)
 
+            tugas.addOnSuccessListener {
+                Toast.makeText(requireContext(), "Berhasil disimpan", Toast.LENGTH_SHORT).show()
+                dialog.dismiss()
+            }.addOnFailureListener { e ->
+                Toast.makeText(requireContext(), "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
+        dialog.show()
     }
 
-    private fun hapusProduk(produk: Produk) {
-
+    private fun hapus(docId: String, produk: Produk) {
         AlertDialog.Builder(requireContext())
             .setTitle("Hapus Produk")
-            .setMessage("Yakin ingin menghapus ${produk.nama}?")
-
-            .setPositiveButton("Hapus") { _, _ ->
-
-                Toast.makeText(
-                    requireContext(),
-                    "Mencari ID = ${produk.id}",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                db.collection("Produk")
-                    .whereEqualTo("id", produk.id)
-                    .get()
-                    .addOnSuccessListener { documents ->
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Jumlah data ditemukan = ${documents.size()}",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        if (documents.isEmpty) {
-
-                            Toast.makeText(
-                                requireContext(),
-                                "Data dengan ID ${produk.id} tidak ditemukan!",
-                                Toast.LENGTH_LONG
-                            ).show()
-
-                            return@addOnSuccessListener
-                        }
-
-                        val docId = documents.documents[0].id
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Document ID = $docId",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                        db.collection("Produk")
-                            .document(docId)
-                            .delete()
-                            .addOnSuccessListener {
-
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Produk berhasil dihapus",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-
-                                loadProduk()
-
-                            }
-                            .addOnFailureListener { e ->
-
-                                Toast.makeText(
-                                    requireContext(),
-                                    "Gagal menghapus: ${e.message}",
-                                    Toast.LENGTH_LONG
-                                ).show()
-
-                            }
-
-                    }
-                    .addOnFailureListener { e ->
-
-                        Toast.makeText(
-                            requireContext(),
-                            "Query gagal: ${e.message}",
-                            Toast.LENGTH_LONG
-                        ).show()
-
-                    }
-
-            }
-
+            .setMessage("Yakin hapus \"${produk.nama}\"?")
+            .setPositiveButton("Hapus") { _, _ -> db.collection("Produk").document(docId).delete() }
             .setNegativeButton("Batal", null)
-
             .show()
-
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

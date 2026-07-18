@@ -30,6 +30,7 @@ class KeranjangAdapter(
             val totalHargaItem = item.produk.harga * item.kuantitas
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(totalHargaItem).replace("Rp", "Rp ")
+
         }
     }
 

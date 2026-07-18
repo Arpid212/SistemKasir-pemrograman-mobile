@@ -1,52 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    android:orientation="vertical">
 
-    <!-- Card Jenis Menu -->
-
-    <androidx.cardview.widget.CardView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProduk"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="3dp">
+        android:padding="8dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Jenis Menu"
-                android:textStyle="bold"
-                android:textSize="18sp"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvProduk"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginTop="12dp"/>
-
-        </LinearLayout>
-
-    </androidx.cardview.widget.CardView>
-
-    <Button
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/btnTambahProduk"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TAMBAHKAN MENU BARU"
-        android:textStyle="bold"
-        android:layout_marginTop="16dp"/>
+        android:layout_margin="12dp"
+        android:backgroundTint="@color/primary_color"
+        android:text="TAMBAHKAN MENU BARU" />
 
 </LinearLayout>

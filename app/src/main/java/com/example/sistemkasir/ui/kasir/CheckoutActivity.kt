@@ -41,6 +41,7 @@ class CheckoutActivity : AppCompatActivity() {
         for (i in listNama.indices) {
             // Buat objek produk buatan dari data yang diterima
             val produk = Produk(nama = listNama[i], harga = listHarga[i])
+
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 
