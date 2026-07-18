@@ -5,6 +5,123 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".ui.admin.DashboardAdminActivity">
+
+    <!-- Judul Halaman -->
+    <TextView
+        android:id="@+id/txtJudul"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:text="Dashboard"
+        android:textColor="#000000"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/btnKeluar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Tombol Keluar -->
+    <Button
+        android:id="@+id/btnKeluar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="Keluar"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:backgroundTint="#F5F5F5"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/txtJudul"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/txtJudul" />
+
+    <!-- Kumpulan Tombol Navigasi Pill -->
+    <LinearLayout
+        android:id="@+id/topNavigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="24dp"
+        android:weightSum="4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txtJudul">
+
+        <!-- Tombol Dash (Default Aktif: Hitam) -->
+        <Button
+            android:id="@+id/btnDashboard"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="Dash"
+            android:textAllCaps="false"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#F5F5F5"
+            app:cornerRadius="50dp" />
+
+        <!-- Tombol Menu (Default Tidak Aktif: Abu-abu) -->
+        <Button
+            android:id="@+id/btnProduk"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="Menu"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#000000"
+            app:cornerRadius="50dp" />
+
+        <!-- Tombol Lapor (Default Tidak Aktif: Abu-abu) -->
+        <Button
+            android:id="@+id/btnLaporan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:text="Lapor"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#000000"
+            app:cornerRadius="50dp" />
+
+        <!-- Tombol Kasir (Default Tidak Aktif: Abu-abu) -->
+        <Button
+            android:id="@+id/btnKasir"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Kasir"
+            android:textAllCaps="false"
+            android:textColor="#FFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            app:backgroundTint="#000000"
+            app:cornerRadius="50dp" />
+    </LinearLayout>
+
+    <!-- Wadah Fragment -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topNavigation" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

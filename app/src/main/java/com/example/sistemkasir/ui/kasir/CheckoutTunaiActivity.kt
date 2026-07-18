@@ -8,6 +8,7 @@ import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
+import android.content.Context
 import com.example.sistemkasir.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.firestore.FirebaseFirestore
@@ -79,6 +80,10 @@ class CheckoutTunaiActivity : AppCompatActivity() {
             )
         }
 
+        // Ambil nama kasir dari SharedPreferences
+        val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
+        val namaKasirAktif = sharedPref.getString("NAMA_USER", "Kasir Tidak Dikenal")
+
         val dataTransaksi = hashMapOf(
             "waktu_transaksi" to com.google.firebase.Timestamp.now(),
             "metode_pembayaran" to "Tunai",
@@ -86,9 +91,8 @@ class CheckoutTunaiActivity : AppCompatActivity() {
             "nominal_bayar" to bayar,
             "kembalian" to (bayar - totalTagihan),
             "rincian" to rincianPesanan,
-            "nama_kasir" to "Kasir Aktif"
+            "nama_kasir" to namaKasirAktif // Menggunakan variabel dinamis dari session
         )
-
         db.collection("Transaksi")
             .add(dataTransaksi)
             .addOnSuccessListener {

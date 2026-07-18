@@ -1,5 +1,10 @@
 package com.example.sistemkasir.ui.admin
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.Intent
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
@@ -10,45 +15,83 @@ import com.example.sistemkasir.ui.admin.fragment.DashboardFragment
 import com.example.sistemkasir.ui.admin.fragment.KasirFragment
 import com.example.sistemkasir.ui.admin.fragment.LaporanFragment
 import com.example.sistemkasir.ui.admin.fragment.ProdukFragment
+import com.example.sistemkasir.ui.auth.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class DashboardAdminActivity : AppCompatActivity() {
 
     private lateinit var txtJudul: TextView
+    private lateinit var btnDashboard: Button
+    private lateinit var btnProduk: Button
+    private lateinit var btnLaporan: Button
+    private lateinit var btnKasir: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard_admin)
 
         txtJudul = findViewById(R.id.txtJudul)
+        val btnKeluar = findViewById<Button>(R.id.btnKeluar)
 
-        val btnDashboard = findViewById<Button>(R.id.btnDashboard)
-        val btnProduk = findViewById<Button>(R.id.btnProduk)
-        val btnLaporan = findViewById<Button>(R.id.btnLaporan)
-        val btnKasir = findViewById<Button>(R.id.btnKasir)
+        // Inisialisasi tombol navigasi
+        btnDashboard = findViewById(R.id.btnDashboard)
+        btnProduk = findViewById(R.id.btnProduk)
+        btnLaporan = findViewById(R.id.btnLaporan)
+        btnKasir = findViewById(R.id.btnKasir)
 
+        // Logika Tombol Navigasi
         btnDashboard.setOnClickListener {
             txtJudul.text = "Dashboard"
             replaceFragment(DashboardFragment())
+            updateWarnaTombol(btnDashboard)
         }
 
         btnProduk.setOnClickListener {
             txtJudul.text = "Manajemen Menu"
             replaceFragment(ProdukFragment())
+            updateWarnaTombol(btnProduk)
         }
 
         btnLaporan.setOnClickListener {
             txtJudul.text = "Laporan"
             replaceFragment(LaporanFragment())
+            updateWarnaTombol(btnLaporan)
         }
 
         btnKasir.setOnClickListener {
             txtJudul.text = "Manajemen Kasir"
             replaceFragment(KasirFragment())
+            updateWarnaTombol(btnKasir)
         }
 
+        // Logika Tombol Keluar
+        btnKeluar.setOnClickListener {
+            tampilkanDialogKeluar()
+        }
+
+        // Tampilan default saat pertama kali dibuka
         if (savedInstanceState == null) {
             txtJudul.text = "Dashboard"
             replaceFragment(DashboardFragment())
+            updateWarnaTombol(btnDashboard)
+        }
+    }
+
+    // Fungsi untuk mengubah warna tombol secara dinamis
+    private fun updateWarnaTombol(tombolAktif: Button) {
+        // Masukkan semua tombol ke dalam sebuah Array
+        val semuaTombol = arrayOf(btnDashboard, btnProduk, btnLaporan, btnKasir)
+
+        for (tombol in semuaTombol) {
+            if (tombol == tombolAktif) {
+                // Style untuk tombol yang sedang AKTIF (Hitam, Teks Putih)
+                tombol.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#000000"))
+                tombol.setTextColor(Color.parseColor("#FFFFFF"))
+            } else {
+                // Style untuk tombol TIDAK AKTIF (Abu-abu, Teks Hitam)
+                tombol.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#F5F5F5"))
+                tombol.setTextColor(Color.parseColor("#000000"))
+            }
         }
     }
 
@@ -56,5 +99,29 @@ class DashboardAdminActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.fragmentContainer, fragment)
             .commit()
+    }
+
+    private fun tampilkanDialogKeluar() {
+        AlertDialog.Builder(this)
+            .setTitle("Konfirmasi Keluar")
+            .setMessage("Apakah Anda yakin ingin keluar dari akun Admin?")
+            .setPositiveButton("Ya, Keluar") { _, _ ->
+                prosesLogout()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun prosesLogout() {
+        FirebaseAuth.getInstance().signOut()
+        val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 }
