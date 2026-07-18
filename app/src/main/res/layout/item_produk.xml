@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#FFFFFF"
@@ -52,38 +53,41 @@
         app:layout_constraintTop_toBottomOf="@id/tvHarga" />
 
     <!-- Tombol Edit (Hitam Peat) -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnEdit"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_marginEnd="8dp"
-        android:text="EDIT"
-        android:textColor="#FFFFFF"
-        android:textSize="10sp"
-        android:textStyle="bold"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        app:backgroundTint="#000000"
-        app:cornerRadius="6dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btnHapus" />
 
     <!-- Tombol Hapus (Abu-abu) -->
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnHapus"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:text="HAPUS"
-        android:textColor="#000000"
-        android:textSize="10sp"
-        android:textStyle="bold"
+        android:id="@+id/btnEdit"
+        android:layout_width="69dp"
+        android:layout_height="28dp"
+        android:layout_marginEnd="8dp"
         android:insetTop="0dp"
         android:insetBottom="0dp"
+        android:text="EDIT"
+        android:textColor="#FFFFFF"
+        android:textSize="8sp"
+        android:textStyle="bold"
+        app:backgroundTint="#000000"
+        app:cornerRadius="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnHapus"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.487" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnHapus"
+        android:layout_width="81dp"
+        android:layout_height="28dp"
+        android:insetTop="0dp"
+        android:insetBottom="0dp"
+        android:text="HAPUS"
+        android:textColor="#000000"
+        android:textSize="8sp"
+        android:textStyle="bold"
         app:backgroundTint="#F5F5F5"
         app:cornerRadius="6dp"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.473" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
