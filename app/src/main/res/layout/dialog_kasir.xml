@@ -17,7 +17,7 @@
         android:textStyle="bold" />
 
     <EditText
-        android:id="@+id/inputNamaLenagkap"
+        android:id="@+id/inputNamaLengkap"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_marginBottom="32dp"
