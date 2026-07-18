@@ -45,8 +45,8 @@ class LoginActivity : AppCompatActivity() {
 
         //UNTUK KEPERLUAN TESTNG TANPA LOGIN
         tombolMasuk.setOnClickListener {
-            //startActivity(Intent(this, DashboardAdminActivity::class.java))
-            startActivity(Intent(this, DashboardKasirActivity::class.java))
+            startActivity(Intent(this, DashboardAdminActivity::class.java))
+            //startActivity(Intent(this, DashboardKasirActivity::class.java))
             finish()
         }
     }

@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.sistemkasir.R
 import com.example.sistemkasir.model.Produk
 import java.text.NumberFormat
@@ -29,13 +28,6 @@ class KatalogProdukAdapter(
 
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(produk.harga).replace("Rp", "Rp ")
-
-            // Load foto menggunakan Glide
-            Glide.with(itemView.context)
-                .load(produk.foto)
-                .placeholder(R.drawable.ic_launcher_background) // Opsional: placeholder saat loading
-                .error(R.drawable.ic_launcher_background)      // Opsional: gambar jika error
-                .into(imgFoto)
 
             itemView.setOnClickListener { onItemClick(produk) }
         }
