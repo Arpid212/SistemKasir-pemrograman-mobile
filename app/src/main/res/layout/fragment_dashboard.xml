@@ -13,18 +13,21 @@
         android:paddingTop="8dp"
         android:paddingBottom="24dp">
 
-        <!-- Baris Statistik CardView -->
+        <!-- Baris Statistik CardView (Tetap Sama) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <!-- Card 1: Total Pendapatan -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/cardPendapatan"
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?android:attr/selectableItemBackground"
                 app:cardBackgroundColor="#F5F5F5"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
@@ -44,11 +47,15 @@
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
+                    <!-- PERUBAHAN DI SINI: maxLines & ellipsize -->
                     <TextView
                         android:id="@+id/txtPendapatan"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:ellipsize="end"
+                        android:gravity="center"
+                        android:maxLines="1"
                         android:text="Rp0"
                         android:textColor="#000000"
                         android:textSize="22sp"
@@ -56,7 +63,6 @@
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
 
-            <!-- Card 2: Penjualan -->
             <androidx.cardview.widget.CardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -65,14 +71,12 @@
                 app:cardBackgroundColor="#F5F5F5"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="0dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="8dp">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -80,7 +84,6 @@
                         android:textColor="#666666"
                         android:textSize="12sp"
                         android:textStyle="bold" />
-
                     <TextView
                         android:id="@+id/txtPenjualan"
                         android:layout_width="wrap_content"
@@ -94,15 +97,33 @@
             </androidx.cardview.widget.CardView>
         </LinearLayout>
 
-        <!-- Judul Daftar Pegawai -->
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- ✨ PERUBAHAN DI SINI: Header Daftar Kasir dengan Tombol Lihat Semua -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:text="Daftar Pegawai"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Daftar Kasir"
+                android:textColor="#000000"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Tombol yang akan diklik untuk pindah ke Fragment Kasir -->
+            <TextView
+                android:id="@+id/btnLihatSemuaKasir"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lihat Semua >"
+                android:textColor="#000000"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
 
         <!-- Tempat menaruh list pegawai -->
         <androidx.recyclerview.widget.RecyclerView
