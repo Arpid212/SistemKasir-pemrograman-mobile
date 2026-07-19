@@ -42,15 +42,26 @@ class CheckoutActivity : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // 1. Tangkap array dasar dari Intent halaman utama kasir
+        // 1. ✨ SEKARANG MENANGKAP DATA LENGKAP DARI INTENT
+        val listId = intent.getIntegerArrayListExtra("LIST_ID") ?: arrayListOf()
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
+        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf()
+        val listKategori = intent.getStringArrayListExtra("LIST_KATEGORI") ?: arrayListOf()
 
-        // 2. Rakit kembali menjadi list pesanan keranjang
+        // 2. ✨ RAKIT KEMBALI DENGAN DATA PARAMETER YANG LENGKAP
         val listPesanan = arrayListOf<ItemKeranjang>()
         for (i in listNama.indices) {
-            val produk = Produk(nama = listNama[i], harga = listHarga[i])
+            val produk = Produk(
+                id = if (i < listId.size) listId[i] else i,
+                nama = listNama[i],
+                harga = listHarga[i],
+                deskripsi = "",
+                stok = 0,
+                foto = if (i < listFoto.size) listFoto[i] else "",
+                kategori = if (i < listKategori.size) listKategori[i] else ""
+            )
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 
@@ -105,7 +116,13 @@ class CheckoutActivity : AppCompatActivity() {
 
         val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
 
-        findViewById<TextView>(R.id.tvLabelSubtotal).text = "Subtotal (${keranjang.size})"
+        // Menghitung total jumlah kuantitas barang, bukan jumlah jenis itemnya saja
+        var totalKuantitasSemua = 0
+        for (item in keranjang) {
+            totalKuantitasSemua += item.kuantitas
+        }
+
+        findViewById<TextView>(R.id.tvLabelSubtotal).text = "Subtotal ($totalKuantitasSemua)"
         findViewById<TextView>(R.id.tvNilaiSubtotal).text = formatRupiah.format(subtotal).replace("Rp", "Rp ")
         findViewById<TextView>(R.id.tvNilaiPajak).text = formatRupiah.format(pajak).replace("Rp", "Rp ")
         findViewById<TextView>(R.id.tvNilaiTotal).text = formatRupiah.format(totalAkhirBelanja).replace("Rp", "Rp ")

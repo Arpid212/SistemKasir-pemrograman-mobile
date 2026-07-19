@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.sistemkasir.R
 import com.example.sistemkasir.model.ItemKeranjang
 import java.text.NumberFormat
@@ -31,6 +32,15 @@ class KeranjangAdapter(
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(totalHargaItem).replace("Rp", "Rp ")
 
+            // ✨ PERBAIKAN: Load Gambar Menggunakan Glide agar UI Layout Tidak Bergeser ke Tengah
+            if (!item.produk.foto.isNullOrEmpty()) {
+                Glide.with(itemView.context)
+                    .load(item.produk.foto)
+                    .into(imgFoto)
+            } else {
+                // Jika URL foto kosong dari database, pasang gambar default bawaan Android
+                imgFoto.setImageResource(android.R.drawable.ic_menu_gallery)
+            }
         }
     }
 

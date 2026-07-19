@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sistemkasir.R
@@ -22,11 +23,11 @@ class DashboardKasirActivity : AppCompatActivity() {
     private val listKeranjang = arrayListOf<ItemKeranjang>()
     private var subtotalBelanja = 0.0
 
-    // Variabel untuk menampung semua data produk asli & item aktif untuk tombol +/-
     private var masterListProduk = arrayListOf<Produk>()
     private var itemAktif: ItemKeranjang? = null
 
     private lateinit var adapter: KatalogProdukAdapter
+    private lateinit var rvKatalog: RecyclerView
     private lateinit var btnCheckout: Button
     private lateinit var tvTotalItem: TextView
     private lateinit var btnMinusGlobal: TextView
@@ -38,14 +39,12 @@ class DashboardKasirActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dashboard_kasir)
 
-        // Inisialisasi View berdasarkan ID di XML kamu
-        val rvKatalog = findViewById<RecyclerView>(R.id.rvKatalogProduk)
+        rvKatalog = findViewById<RecyclerView>(R.id.rvKatalogProduk)
         btnCheckout = findViewById(R.id.btnCheckout)
         tvTotalItem = findViewById(R.id.tvTotalItemDiKeranjang)
         btnMinusGlobal = findViewById(R.id.btnMinusGlobal)
         btnPlusGlobal = findViewById(R.id.btnPlusGlobal)
 
-        // Mengambil ChipGroup di dalam HorizontalScrollView karena ChipGroup tidak diberi ID di XML
         val chipGroup = findViewById<HorizontalScrollView>(R.id.scrollCategories).getChildAt(0) as ChipGroup
 
         adapter = KatalogProdukAdapter(emptyList()) { produkTerpilih ->
@@ -56,7 +55,7 @@ class DashboardKasirActivity : AppCompatActivity() {
         pantauDataDariAdmin()
 
         // --- FILTER KATEGORI ---
-        chipGroup.setOnCheckedStateChangeListener { group, checkedIds ->
+        chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             val selectedChipId = checkedIds.firstOrNull()
             if (selectedChipId == null) {
                 adapter.updateData(masterListProduk)
@@ -76,24 +75,29 @@ class DashboardKasirActivity : AppCompatActivity() {
 
         // --- LOGIKA TOMBOL + GLOBAL ---
         btnPlusGlobal.setOnClickListener {
+            if (itemAktif == null && listKeranjang.isNotEmpty()) {
+                itemAktif = listKeranjang.last()
+            }
             itemAktif?.let {
                 it.kuantitas += 1
                 hitungSubtotal()
-            }
+            } ?: Toast.makeText(this, "Silakan pilih produk dulu!", Toast.LENGTH_SHORT).show()
         }
 
         // --- LOGIKA TOMBOL - GLOBAL ---
         btnMinusGlobal.setOnClickListener {
-            itemAktif?.let {
-                if (it.kuantitas > 1) {
-                    it.kuantitas -= 1
+            if (itemAktif == null && listKeranjang.isNotEmpty()) {
+                itemAktif = listKeranjang.last()
+            }
+            itemAktif?.let { currentItem ->
+                if (currentItem.kuantitas > 1) {
+                    currentItem.kuantitas -= 1
                 } else {
-                    listKeranjang.remove(it)
-                    // Jika item habis, alihkan fokus aktif ke item terakhir di keranjang
+                    listKeranjang.remove(currentItem)
                     itemAktif = if (listKeranjang.isNotEmpty()) listKeranjang.last() else null
                 }
                 hitungSubtotal()
-            }
+            } ?: Toast.makeText(this, "Keranjang kosong!", Toast.LENGTH_SHORT).show()
         }
 
         // Bluetooth Printer Thread
@@ -102,28 +106,46 @@ class DashboardKasirActivity : AppCompatActivity() {
             val terhubung = com.example.sistemkasir.utils.PrinterUtil.connectBluetooth(macAddressPrinter)
             runOnUiThread {
                 if (terhubung) {
-                    android.widget.Toast.makeText(this, "Printer Terhubung", android.widget.Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Printer Terhubung", Toast.LENGTH_SHORT).show()
                 } else {
-                    android.widget.Toast.makeText(this, "Gagal menghubungkan Printer", android.widget.Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Gagal menghubungkan Printer", Toast.LENGTH_SHORT).show()
                 }
             }
         }.start()
 
+        // --- TOMBOL CHECKOUT (SUDAH DIPERBAIKI) ---
         btnCheckout.setOnClickListener {
+            if (listKeranjang.isEmpty()) {
+                Toast.makeText(this, "Keranjang masih kosong!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // Menampung semua data item secara lengkap
+            val listId = ArrayList<Int>()
             val listNama = ArrayList<String>()
             val listHarga = ArrayList<Double>()
             val listQty = ArrayList<Int>()
+            val listFoto = ArrayList<String>()
+            val listKategori = ArrayList<String>()
 
             for (item in listKeranjang) {
+                listId.add(item.produk.id)          // Mengunci ID asli agar quantity tidak tertukar
                 listNama.add(item.produk.nama)
                 listHarga.add(item.produk.harga)
                 listQty.add(item.kuantitas)
+                listFoto.add(item.produk.foto)      // Menyertakan link foto agar UI tidak bergeser
+                listKategori.add(item.produk.kategori)
             }
 
-            val intent = Intent(this, CheckoutActivity::class.java)
-            intent.putStringArrayListExtra("LIST_NAMA", listNama)
-            intent.putExtra("LIST_HARGA", listHarga.toDoubleArray())
-            intent.putIntegerArrayListExtra("LIST_QTY", listQty)
+            val intent = Intent(this, CheckoutActivity::class.java).apply {
+                putIntegerArrayListExtra("LIST_ID", listId)
+                putStringArrayListExtra("LIST_NAMA", listNama)
+                putExtra("LIST_HARGA", listHarga.toDoubleArray())
+                putIntegerArrayListExtra("LIST_QTY", listQty)
+                putStringArrayListExtra("LIST_FOTO", listFoto)
+                putStringArrayListExtra("LIST_KATEGORI", listKategori)
+                putExtra("TOTAL_TAGIHAN", subtotalBelanja)
+            }
             startActivity(intent)
         }
     }
@@ -133,7 +155,6 @@ class DashboardKasirActivity : AppCompatActivity() {
             if (error != null) return@addSnapshotListener
 
             masterListProduk.clear()
-
             for (dokumen in snapshots!!) {
                 val id = dokumen.getLong("id")?.toInt() ?: 0
                 val nama = dokumen.getString("nama") ?: ""
@@ -146,13 +167,12 @@ class DashboardKasirActivity : AppCompatActivity() {
                 val produk = Produk(id, nama, harga, deskripsi, stok, foto, kategori)
                 masterListProduk.add(produk)
             }
-
             adapter.updateData(masterListProduk)
         }
     }
 
     private fun tambahKeKeranjang(produk: Produk) {
-        val indexProduk = listKeranjang.indexOfFirst { it.produk.id == produk.id }
+        val indexProduk = listKeranjang.indexOfFirst { it.produk.nama.equals(produk.nama, ignoreCase = true) }
 
         if (indexProduk != -1) {
             listKeranjang[indexProduk].kuantitas += 1
@@ -175,8 +195,11 @@ class DashboardKasirActivity : AppCompatActivity() {
     }
 
     private fun perbaruiUI() {
-        // Update angka kuantitas aktif di dalam lingkaran putih (tvTotalItemDiKeranjang)
-        tvTotalItem.text = (itemAktif?.kuantitas ?: 0).toString()
+        var totalKuantitasSemua = 0
+        for (item in listKeranjang) {
+            totalKuantitasSemua += item.kuantitas
+        }
+        tvTotalItem.text = totalKuantitasSemua.toString()
 
         if (subtotalBelanja > 0) {
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))

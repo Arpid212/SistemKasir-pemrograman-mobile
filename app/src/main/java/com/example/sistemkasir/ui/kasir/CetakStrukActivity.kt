@@ -40,12 +40,31 @@ class CetakStrukActivity : AppCompatActivity() {
 
         val formatter = NumberFormat.getNumberInstance(Locale("in", "ID"))
 
-        // 1. Tampilkan barang
-        if (listNama.isNotEmpty()) {
-            tvNamaItem.text = listNama[0]
-            tvQtyItem.text = "x${listQty[0]}"
-            tvHargaItem.text = formatter.format(listHarga[0].toInt())
+        // ✨ PERBAIKAN: Menggabungkan semua item menggunakan StringBuilder agar tampil berjejer ke bawah
+        val namaBuilder = StringBuilder()
+        val qtyBuilder = StringBuilder()
+        val hargaBuilder = StringBuilder()
+
+        for (i in listNama.indices) {
+            namaBuilder.append(listNama[i])
+            qtyBuilder.append("x${listQty[i]}")
+
+            // Menghitung total harga per baris item (Harga Satuan x Qty)
+            val totalHargaPerItem = listHarga[i] * listQty[i]
+            hargaBuilder.append(formatter.format(totalHargaPerItem.toInt()))
+
+            // Berikan baris baru jika bukan item terakhir agar teks rapi sejajar ke bawah
+            if (i < listNama.size - 1) {
+                namaBuilder.append("\n")
+                qtyBuilder.append("\n")
+                hargaBuilder.append("\n")
+            }
         }
+
+        // Tampilkan teks gabungan ke TextView masing-masing
+        tvNamaItem.text = namaBuilder.toString()
+        tvQtyItem.text = qtyBuilder.toString()
+        tvHargaItem.text = hargaBuilder.toString()
 
         // 2. Set Total Belanja
         tvTotalStruk.text = formatter.format(totalAkhir.toInt())
