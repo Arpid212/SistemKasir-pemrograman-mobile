@@ -1,19 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Warna Utama Aplikasi (Hitam) -->
     <color name="primary_color">#000000</color>
     <color name="primary_dark">#000000</color>
     <color name="colorAccent">#666666</color>
-
-    <!-- Warna Latar Belakang (Putih Bersih) -->
     <color name="background_light">#FFFFFF</color>
     <color name="surface_white">#FFFFFF</color>
-
-    <!-- Warna Teks -->
     <color name="text_primary">#000000</color>
     <color name="text_secondary">#666666</color>
-
-    <!-- Warna Elemen Pendukung (Abu-abu) -->
     <color name="divider_color">#E0E0E0</color>
     <color name="gray_light">#F5F5F5</color>
     <color name="gray_dark">#D0D0D0</color>
