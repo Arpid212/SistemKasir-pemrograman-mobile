@@ -5,22 +5,29 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sistemkasir.R
 import com.example.sistemkasir.adapter.KeranjangAdapter
 import com.example.sistemkasir.model.ItemKeranjang
 import com.example.sistemkasir.model.Produk
-import com.example.sistemkasir.ui.admin.DashboardAdminActivity
 import com.google.android.material.appbar.MaterialToolbar
 import java.text.NumberFormat
 import java.util.Locale
+
+// IMPORT EKSPLISIT AGAR TIDAK UNRESOLVED REFERENCE
+import com.example.sistemkasir.ui.kasir.CheckoutQrisActivity
+import com.example.sistemkasir.ui.kasir.CheckoutTunaiActivity
 
 class CheckoutActivity : AppCompatActivity() {
 
     private lateinit var adapter: KeranjangAdapter
     private val PAJAK_PERSEN = 0.10
     private var totalAkhirBelanja = 0.0
+
+    // Variabel untuk melacak metode pembayaran aktif (Bawaan awal: Tunai)
+    private var metodeTerpilih = "Tunai"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,39 +37,60 @@ class CheckoutActivity : AppCompatActivity() {
         val rvKeranjang = findViewById<RecyclerView>(R.id.rvKeranjangCheckout)
         val btnLanjut = findViewById<Button>(R.id.btnLanjutCheckout)
 
+        // Menghubungkan ke TextView Pembayaran di pojok kanan atas XML kamu
+        val tvMetode = findViewById<TextView>(R.id.tvMetodePembayaran)
+
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // 1. Tangkap array dasar dari Intent
+        // 1. Tangkap array dasar dari Intent halaman utama kasir
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
 
-        // 2. Rakit kembali menjadi list pesanan
+        // 2. Rakit kembali menjadi list pesanan keranjang
         val listPesanan = arrayListOf<ItemKeranjang>()
         for (i in listNama.indices) {
-            // Buat objek produk buatan dari data yang diterima
             val produk = Produk(nama = listNama[i], harga = listHarga[i])
-
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 
-        // 3. Masukkan ke adapter
+        // 3. Masukkan ke RecyclerView Adapter
         adapter = KeranjangAdapter(listPesanan)
         rvKeranjang.layoutManager = LinearLayoutManager(this)
         rvKeranjang.adapter = adapter
 
         hitungRincianBiaya(listPesanan)
 
+        // --- LOGIKA MENAMPILKAN POPUP PILIHAN MENU (TUNAI / QRIS) ---
+        tvMetode.setOnClickListener { view ->
+            val popup = PopupMenu(this, view)
+            popup.menu.add("Tunai")
+            popup.menu.add("QRIS")
+
+            popup.setOnMenuItemClickListener { menuItem ->
+                metodeTerpilih = menuItem.title.toString()
+                tvMetode.text = metodeTerpilih // Mengubah teks di UI (kanan atas) sesuai pilihan
+                true
+            }
+            popup.show()
+        }
+
+        // --- LOGIKA TOMBOL LANJUT DINAMIS ---
         btnLanjut.setOnClickListener {
-            // Melempar HANYA total akhir (tipe data Double biasa) ke halaman Tunai
-            val intentTunai = Intent(this, CheckoutTunaiActivity::class.java)
-            intentTunai.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
+            // Tentukan target halaman berdasarkan metode yang dipilih oleh kasir
+            val intentTujuan = if (metodeTerpilih == "QRIS") {
+                Intent(this, CheckoutQrisActivity::class.java)
+            } else {
+                Intent(this, CheckoutTunaiActivity::class.java)
+            }
 
-            intentTunai.putStringArrayListExtra("LIST_NAMA", listNama)
-            intentTunai.putExtra("LIST_HARGA", listHarga)
-            intentTunai.putIntegerArrayListExtra("LIST_QTY", listQty)
+            // Kirimkan semua data rincian belanja ke halaman berikutnya
+            intentTujuan.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
+            intentTujuan.putStringArrayListExtra("LIST_NAMA", listNama)
+            intentTujuan.putExtra("LIST_HARGA", listHarga)
+            intentTujuan.putIntegerArrayListExtra("LIST_QTY", listQty)
 
-            startActivity(intentTunai)
+            startActivity(intentTujuan)
         }
     }
 
