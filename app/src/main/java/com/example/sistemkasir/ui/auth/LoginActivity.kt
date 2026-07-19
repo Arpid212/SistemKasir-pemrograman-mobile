@@ -33,28 +33,28 @@ class LoginActivity : AppCompatActivity() {
         val tombolMasuk = findViewById<Button>(R.id.tombolMasuk)
 
         // Aksi ketika tombol ditekan (Logika Asli Diaktifkan)
-     //   tombolMasuk.setOnClickListener {
-         //   val email = inputEmail.text.toString().trim()
-        //    val pin = inputPin.text.toString().trim()
-
-          //  if (email.isNotEmpty() && pin.isNotEmpty()) {
-           //     prosesLogin(email, pin)
-          //  } else {
-            //    Toast.makeText(this, "Email dan PIN tidak boleh kosong!", Toast.LENGTH_SHORT).show()
-           // }
-       // }
-            //UNTUK KEPERLUAN TESTNG TANPA LOGIN
         tombolMasuk.setOnClickListener {
-            // Simulasi penyimpanan sesi agar fitur transaksi tidak error/kosong
-            val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
-            with(sharedPref.edit()) {
-                putString("NAMA_USER", "Admin Tester")
-                putString("ROLE_USER", "Admin")
-                apply()
+            val email = inputEmail.text.toString().trim()
+            val pin = inputPin.text.toString().trim()
+
+            if (email.isNotEmpty() && pin.isNotEmpty()) {
+                prosesLogin(email, pin)
+            } else {
+                Toast.makeText(this, "Email dan PIN tidak boleh kosong!", Toast.LENGTH_SHORT).show()
             }
-            startActivity(Intent(this, DashboardKasirActivity::class.java))
-            finish()
         }
+            //UNTUK KEPERLUAN TESTNG TANPA LOGIN
+        //tombolMasuk.setOnClickListener {
+            // Simulasi penyimpanan sesi agar fitur transaksi tidak error/kosong
+            //val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
+            //with(sharedPref.edit()) {
+             //   putString("NAMA_USER", "Admin Tester")
+             //   putString("ROLE_USER", "Admin")
+                //apply()
+         //   }
+         //   startActivity(Intent(this, DashboardKasirActivity::class.java))
+         //   finish()
+      //  }
     }
 
     private fun prosesLogin(email: String, pin: String) {

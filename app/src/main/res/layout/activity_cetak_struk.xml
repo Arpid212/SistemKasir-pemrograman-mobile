@@ -35,7 +35,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Nama Toko Anda\nAlamat Toko Baris 1\nAlamat Toko Baris 2\nTelp: 1500-360"
+                android:text="Pawoon Resto\nAXA Tower Lt.7, Jl Prof\nDR. Satrio Kav. 18\nTelp: 1500-360"
                 android:gravity="center"
                 android:textColor="#666666"
                 android:lineSpacingExtra="4dp"/>
