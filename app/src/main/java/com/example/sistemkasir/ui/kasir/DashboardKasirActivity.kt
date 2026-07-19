@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.HorizontalScrollView
 import android.widget.TextView
 import android.widget.Toast
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sistemkasir.R
@@ -17,6 +18,9 @@ import com.google.android.material.chip.ChipGroup
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.NumberFormat
 import java.util.Locale
+import android.app.AlertDialog
+import com.example.sistemkasir.ui.auth.LoginActivity
+import com.google.firebase.auth.FirebaseAuth
 
 class DashboardKasirActivity : AppCompatActivity() {
 
@@ -148,6 +152,12 @@ class DashboardKasirActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
+        // Tambahkan baris ini di dalam onCreate()
+        val btnKeluar = findViewById<Button>(R.id.btnKeluar)
+
+        btnKeluar.setOnClickListener {
+            tampilkanDialogKeluar()
+        }
     }
 
     private fun pantauDataDariAdmin() {
@@ -194,6 +204,33 @@ class DashboardKasirActivity : AppCompatActivity() {
         perbaruiUI()
     }
 
+    private fun tampilkanDialogKeluar() {
+        AlertDialog.Builder(this)
+            .setTitle("Konfirmasi Keluar")
+            .setMessage("Apakah Anda yakin ingin mengakhiri sesi kasir ini?")
+            .setPositiveButton("Ya, Keluar") { _, _ ->
+                prosesLogout()
+            }
+            .setNegativeButton("Batal") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun prosesLogout() {
+        // 1. Hapus sesi di Firebase Authentication
+        FirebaseAuth.getInstance().signOut()
+
+        // 2. Hapus memori nama pengguna di SharedPreferences
+        val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
+
+        // 3. Kembali ke halaman Login dan hapus tumpukan halaman Kasir
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
     private fun perbaruiUI() {
         var totalKuantitasSemua = 0
         for (item in listKeranjang) {

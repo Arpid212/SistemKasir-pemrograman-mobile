@@ -14,7 +14,7 @@ object GeneratorUtil {
     }
 
     fun generatePin(): String{
-        val angkaRandom = (1000..9999).random()
+        val angkaRandom = (100000..999999).random()
         return angkaRandom.toString()
     }
 

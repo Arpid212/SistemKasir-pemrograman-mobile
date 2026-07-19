@@ -14,6 +14,10 @@ import com.example.sistemkasir.model.Pengguna
 import com.example.sistemkasir.ui.admin.adapter.KasirAdapter
 import com.example.sistemkasir.utils.GeneratorUtil
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+
 
 // Pola sama persis kayak ProdukFragment: 1 dialog buat Tambah & Update.
 // Bedanya sama Produk: pas Tambah, email & PIN digenerate otomatis (gak diinput
@@ -126,21 +130,48 @@ class KasirFragment : Fragment() {
             }
     }
 
+
     private fun lanjutkanSimpanKasir(nama: String, dialog: AlertDialog) {
         val emailDasar = GeneratorUtil.generateEmail(nama)
         val pin = GeneratorUtil.generatePin()
 
         cariEmailUnik(emailDasar, 0) { emailUnik ->
-            val data = hashMapOf<String, Any>(
-                "nama" to nama, "email" to emailUnik, "pin" to pin, "role" to "Kasir"
-            )
-            db.collection("Pengguna").add(data)
+
+            // 1. Ambil konfigurasi Firebase utama
+            val mainApp = FirebaseApp.getInstance()
+            val options = mainApp.options
+
+            // 2. Buat "Aplikasi Kedua" sementara agar sesi Admin tidak tertimpa
+            var secondaryApp = FirebaseApp.getApps(requireContext()).find { it.name == "SecondaryApp" }
+            if (secondaryApp == null) {
+                secondaryApp = FirebaseApp.initializeApp(requireContext(), options, "SecondaryApp")
+            }
+
+            // 3. Gunakan Auth dari Aplikasi Kedua untuk mendaftar
+            val secondaryAuth = FirebaseAuth.getInstance(secondaryApp!!)
+
+            secondaryAuth.createUserWithEmailAndPassword(emailUnik, pin)
                 .addOnSuccessListener {
-                    dialog.dismiss()
-                    tampilkanKredensial(emailUnik, pin)
+
+                    // Segera keluarkan sesi dari aplikasi kedua agar bersih
+                    secondaryAuth.signOut()
+
+                    // 4. Simpan ke Firestore menggunakan instance utama (db)
+                    val data = hashMapOf<String, Any>(
+                        "nama" to nama, "email" to emailUnik, "pin" to pin, "role" to "Kasir"
+                    )
+
+                    db.collection("Pengguna").add(data)
+                        .addOnSuccessListener {
+                            dialog.dismiss()
+                            tampilkanKredensial(emailUnik, pin)
+                        }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(requireContext(), "Profil gagal disimpan: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
                 }
                 .addOnFailureListener { e ->
-                    Toast.makeText(requireContext(), "Gagal: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Gagal buat akses: ${e.message}", Toast.LENGTH_LONG).show()
                 }
         }
     }

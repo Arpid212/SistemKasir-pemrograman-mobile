@@ -1,13 +1,19 @@
 package com.example.sistemkasir.ui.kasir
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.view.Gravity
+import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.sistemkasir.R
 import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.button.MaterialButton
 import java.text.NumberFormat
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 class CetakStrukActivity : AppCompatActivity() {
@@ -17,15 +23,6 @@ class CetakStrukActivity : AppCompatActivity() {
         setContentView(R.layout.activity_cetak_struk)
 
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbarStruk)
-        val btnCetak = findViewById<MaterialButton>(R.id.btnCetakPrinter)
-
-        val tvNamaItem = findViewById<TextView>(R.id.tvNamaItemStruk)
-        val tvQtyItem = findViewById<TextView>(R.id.tvQtyItemStruk)
-        val tvHargaItem = findViewById<TextView>(R.id.tvHargaItemStruk)
-        val tvTotalStruk = findViewById<TextView>(R.id.tvTotalStruk)
-        val tvTunai = findViewById<TextView>(R.id.tvTunaiStruk)
-        val tvKembali = findViewById<TextView>(R.id.tvKembaliStruk)
-
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
@@ -33,54 +30,85 @@ class CetakStrukActivity : AppCompatActivity() {
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
         val totalAkhir = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
 
-        // Tangkap data tambahan dari CheckoutTunaiActivity
         val metodePembayaran = intent.getStringExtra("METODE_PEMBAYARAN") ?: "QRIS"
         val nominalBayar = intent.getDoubleExtra("NOMINAL_BAYAR", totalAkhir)
         val kembalian = intent.getDoubleExtra("KEMBALIAN", 0.0)
 
+        // Menggunakan formatter persis seperti kode awal Anda
         val formatter = NumberFormat.getNumberInstance(Locale("in", "ID"))
 
-        // ✨ PERBAIKAN: Menggabungkan semua item menggunakan StringBuilder agar tampil berjejer ke bawah
-        val namaBuilder = StringBuilder()
-        val qtyBuilder = StringBuilder()
-        val hargaBuilder = StringBuilder()
+        val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
+        val namaKasir = sharedPref.getString("NAMA_PENGGUNA", "Kasir")
+
+        val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val tanggalSekarang = sdf.format(Date())
+        val kodeStruk = System.currentTimeMillis().toString()
+
+        // 1. Set Info Header
+        findViewById<TextView>(R.id.tvInfoStruk).text =
+            "Kode Struk : $kodeStruk\nTanggal : $tanggalSekarang\nKasir : $namaKasir"
+
+        // 2. Set Info Total & Metode (Sesuai gaya angka Anda)
+        findViewById<TextView>(R.id.tvTotalStruk).text = formatter.format(totalAkhir.toInt())
+        findViewById<TextView>(R.id.tvLabelMetode).text = metodePembayaran
+
+        if (metodePembayaran == "QRIS") {
+            findViewById<TextView>(R.id.tvNominalBayarStruk).text = "LUNAS"
+            findViewById<TextView>(R.id.tvLabelKembali).text = "-"
+            findViewById<TextView>(R.id.tvKembaliStruk).text = "-"
+        } else {
+            findViewById<TextView>(R.id.tvNominalBayarStruk).text = formatter.format(nominalBayar.toInt())
+            findViewById<TextView>(R.id.tvKembaliStruk).text = formatter.format(kembalian.toInt())
+        }
+
+        // 3. ✨ INI GANTI DARI STRINGBUILDER MENJADI RENDER DINAMIS ✨
+        val wadahRincian = findViewById<LinearLayout>(R.id.llRincianPesanan)
 
         for (i in listNama.indices) {
-            namaBuilder.append(listNama[i])
-            qtyBuilder.append("x${listQty[i]}")
-
-            // Menghitung total harga per baris item (Harga Satuan x Qty)
-            val totalHargaPerItem = listHarga[i] * listQty[i]
-            hargaBuilder.append(formatter.format(totalHargaPerItem.toInt()))
-
-            // Berikan baris baru jika bukan item terakhir agar teks rapi sejajar ke bawah
-            if (i < listNama.size - 1) {
-                namaBuilder.append("\n")
-                qtyBuilder.append("\n")
-                hargaBuilder.append("\n")
+            val barisItem = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 0, 0, 12) }
             }
+
+            val tvNama = TextView(this).apply {
+                text = listNama[i]
+                setTextColor(resources.getColor(android.R.color.black, theme))
+                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+            }
+
+            val tvQty = TextView(this).apply {
+                text = "x${listQty[i]}"
+                setTextColor(resources.getColor(android.R.color.black, theme))
+                setPadding(0, 0, 32, 0)
+            }
+
+            val tvSubtotal = TextView(this).apply {
+                val totalHargaPerItem = listHarga[i] * listQty[i]
+                text = formatter.format(totalHargaPerItem.toInt())
+                setTextColor(resources.getColor(android.R.color.black, theme))
+                gravity = Gravity.END
+            }
+
+            barisItem.addView(tvNama)
+            barisItem.addView(tvQty)
+            barisItem.addView(tvSubtotal)
+            wadahRincian.addView(barisItem)
         }
 
-        // Tampilkan teks gabungan ke TextView masing-masing
-        tvNamaItem.text = namaBuilder.toString()
-        tvQtyItem.text = qtyBuilder.toString()
-        tvHargaItem.text = hargaBuilder.toString()
-
-        // 2. Set Total Belanja
-        tvTotalStruk.text = formatter.format(totalAkhir.toInt())
-
-        // 3. Cek logika metode pembayaran (Tunai vs QRIS)
-        if (metodePembayaran == "Tunai") {
-            tvTunai.text = formatter.format(nominalBayar.toInt())
-            tvKembali.text = formatter.format(kembalian.toInt())
-        } else {
-            // Jika QRIS, nominal bayar = total belanjaan dan kembalian 0
-            tvTunai.text = formatter.format(totalAkhir.toInt())
-            tvKembali.text = "0"
+        // 4. Logika Tombol
+        findViewById<Button>(R.id.btnCetakPrinter).setOnClickListener {
+            Toast.makeText(this, "Mengirim data ke Printer...", Toast.LENGTH_SHORT).show()
         }
 
-        btnCetak.setOnClickListener {
-            Toast.makeText(this, "Mencetak Struk ke Printer...", Toast.LENGTH_SHORT).show()
+        // Tombol reset keranjang yang wajib ada
+        findViewById<Button>(R.id.btnSelesai).setOnClickListener {
+            val intentDashboard = Intent(this, DashboardKasirActivity::class.java)
+            intentDashboard.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+            startActivity(intentDashboard)
+            finish()
         }
     }
 }

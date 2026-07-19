@@ -65,7 +65,9 @@ class LoginActivity : AppCompatActivity() {
                     // Jika login berhasil, cek Role di Firestore
                     cekRolePengguna(email)
                 } else {
-                    Toast.makeText(this, "Gagal Login: Cek kembali Email dan PIN", Toast.LENGTH_SHORT).show()
+                    // TAMPILKAN PESAN ERROR ASLI DARI FIREBASE
+                    val pesanError = task.exception?.message ?: "Kesalahan tidak diketahui"
+                    Toast.makeText(this, "Gagal Login: $pesanError", Toast.LENGTH_LONG).show()
                 }
             }
     }

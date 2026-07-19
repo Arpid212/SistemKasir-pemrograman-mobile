@@ -18,7 +18,22 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
+    <!-- Tombol Keluar (Baru Ditambahkan) -->
+    <Button
+        android:id="@+id/btnKeluar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:text="Keluar"
+        android:textAllCaps="false"
+        android:textColor="#000000"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:backgroundTint="#F5F5F5"
+        app:cornerRadius="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tvGreeting"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/tvGreeting" />
     <!-- Area Kategori Produk -->
     <HorizontalScrollView
         android:id="@+id/scrollCategories"
@@ -29,6 +44,7 @@
         android:scrollbars="none"
         android:clipToPadding="false"
         app:layout_constraintTop_toBottomOf="@id/tvGreeting">
+
 
         <com.google.android.material.chip.ChipGroup
             android:layout_width="wrap_content"
