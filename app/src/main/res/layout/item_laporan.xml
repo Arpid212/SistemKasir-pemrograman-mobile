@@ -16,32 +16,33 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- Ikon Transaksi -->
-        <ImageView
-            android:id="@+id/ivIconTrx"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="@color/gray_light"
-            android:padding="8dp"
-            android:src="@drawable/ic_launcher_foreground"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="@color/text_primary" />
-
-        <!-- ID Transaksi / Nomor Struk -->
+        <!-- ID Transaksi (Main Title) -->
         <TextView
             android:id="@+id/tvNomorStruk"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
             android:text="#TRX-882910"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@id/tvTotalHarga"
-            app:layout_constraintStart_toEndOf="@id/ivIconTrx"
-            app:layout_constraintTop_toTopOf="@id/ivIconTrx" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- Subtitle: Daftar Menu -->
+        <TextView
+            android:id="@+id/tvDetailPesanan"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Nasi Goreng x2, Es Teh x1"
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            app:layout_constraintEnd_toStartOf="@id/tvTotalHarga"
+            app:layout_constraintStart_toStartOf="@id/tvNomorStruk"
+            app:layout_constraintTop_toBottomOf="@id/tvNomorStruk" />
 
         <!-- Tanggal & Jam -->
         <TextView
@@ -51,9 +52,9 @@
             android:layout_marginTop="2dp"
             android:text="18 Jul 2026 • 14:30"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="10sp"
             app:layout_constraintStart_toStartOf="@id/tvNomorStruk"
-            app:layout_constraintTop_toBottomOf="@id/tvNomorStruk" />
+            app:layout_constraintTop_toBottomOf="@id/tvDetailPesanan" />
 
         <!-- Baris Keterangan Metode & Status -->
         <LinearLayout
@@ -64,7 +65,6 @@
             app:layout_constraintStart_toStartOf="@id/tvNomorStruk"
             app:layout_constraintTop_toBottomOf="@id/tvTanggal">
 
-            <!-- Metode Pembayaran -->
             <TextView
                 android:id="@+id/tvMetodePembayaran"
                 android:layout_width="wrap_content"
@@ -82,7 +82,6 @@
                 android:textSize="10sp"
                 android:textStyle="bold" />
 
-            <!-- Status Transaksi -->
             <TextView
                 android:id="@+id/tvStatus"
                 android:layout_width="wrap_content"

@@ -25,8 +25,6 @@ class CheckoutActivity : AppCompatActivity() {
     private lateinit var adapter: KeranjangAdapter
     private val PAJAK_PERSEN = 0.10
     private var totalAkhirBelanja = 0.0
-
-    // Variabel untuk melacak metode pembayaran aktif (Bawaan awal: Tunai)
     private var metodeTerpilih = "Tunai"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,13 +34,10 @@ class CheckoutActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbarCheckout)
         val rvKeranjang = findViewById<RecyclerView>(R.id.rvKeranjangCheckout)
         val btnLanjut = findViewById<Button>(R.id.btnLanjutCheckout)
-
-        // Menghubungkan ke TextView Pembayaran di pojok kanan atas XML kamu
         val tvMetode = findViewById<TextView>(R.id.tvMetodePembayaran)
 
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // 1. ✨ SEKARANG MENANGKAP DATA LENGKAP DARI INTENT
         val listId = intent.getIntegerArrayListExtra("LIST_ID") ?: arrayListOf()
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
@@ -50,7 +45,6 @@ class CheckoutActivity : AppCompatActivity() {
         val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf()
         val listKategori = intent.getStringArrayListExtra("LIST_KATEGORI") ?: arrayListOf()
 
-        // 2. ✨ RAKIT KEMBALI DENGAN DATA PARAMETER YANG LENGKAP
         val listPesanan = arrayListOf<ItemKeranjang>()
         for (i in listNama.indices) {
             val produk = Produk(
@@ -65,14 +59,12 @@ class CheckoutActivity : AppCompatActivity() {
             listPesanan.add(ItemKeranjang(produk, listQty[i]))
         }
 
-        // 3. Masukkan ke RecyclerView Adapter
         adapter = KeranjangAdapter(listPesanan)
         rvKeranjang.layoutManager = LinearLayoutManager(this)
         rvKeranjang.adapter = adapter
 
         hitungRincianBiaya(listPesanan)
 
-        // --- LOGIKA MENAMPILKAN POPUP PILIHAN MENU (TUNAI / QRIS) ---
         tvMetode.setOnClickListener { view ->
             val popup = PopupMenu(this, view)
             popup.menu.add("Tunai")
@@ -86,20 +78,17 @@ class CheckoutActivity : AppCompatActivity() {
             popup.show()
         }
 
-        // --- LOGIKA TOMBOL LANJUT DINAMIS ---
         btnLanjut.setOnClickListener {
-            // Tentukan target halaman berdasarkan metode yang dipilih oleh kasir
             val intentTujuan = if (metodeTerpilih == "QRIS") {
                 Intent(this, CheckoutQrisActivity::class.java)
             } else {
                 Intent(this, CheckoutTunaiActivity::class.java)
             }
-
-            // Kirimkan semua data rincian belanja ke halaman berikutnya
             intentTujuan.putExtra("TOTAL_TAGIHAN", totalAkhirBelanja)
             intentTujuan.putStringArrayListExtra("LIST_NAMA", listNama)
             intentTujuan.putExtra("LIST_HARGA", listHarga)
             intentTujuan.putIntegerArrayListExtra("LIST_QTY", listQty)
+            intentTujuan.putStringArrayListExtra("LIST_FOTO", listFoto) // ✨ INI YANG DITAMBAHKAN
 
             startActivity(intentTujuan)
         }
@@ -116,7 +105,6 @@ class CheckoutActivity : AppCompatActivity() {
 
         val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
 
-        // Menghitung total jumlah kuantitas barang, bukan jumlah jenis itemnya saja
         var totalKuantitasSemua = 0
         for (item in keranjang) {
             totalKuantitasSemua += item.kuantitas

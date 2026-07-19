@@ -17,6 +17,7 @@ class LaporanAdapter(
 
     class LaporanViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvNomorStruk: TextView = itemView.findViewById(R.id.tvNomorStruk)
+        val tvDetailPesanan: TextView = itemView.findViewById(R.id.tvDetailPesanan)
         val tvTanggal: TextView = itemView.findViewById(R.id.tvTanggal)
         val tvTotalHarga: TextView = itemView.findViewById(R.id.tvTotalHarga)
         val tvMetodePembayaran: TextView = itemView.findViewById(R.id.tvMetodePembayaran)
@@ -31,30 +32,27 @@ class LaporanAdapter(
     override fun onBindViewHolder(holder: LaporanViewHolder, position: Int) {
         val laporan = listLaporan[position]
 
-        // 1. Mengubah format Date menjadi teks yang rapi (Contoh: 16 Jul 2026, 08:45)
+        val idPendek = if (laporan.id.length > 6) laporan.id.take(6).uppercase() else laporan.id
+        holder.tvNomorStruk.text = "TRX-$idPendek"
+
+        holder.tvDetailPesanan.text = laporan.detailPesanan
+
         val sdf = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID"))
         holder.tvTanggal.text = sdf.format(laporan.tanggal)
 
-        // 2. Mengambil data dari model Laporan
         holder.tvMetodePembayaran.text = laporan.jenis
 
-        // 3. Format angka ke Rupiah
         val localeID = Locale("in", "ID")
         val formatRupiah = NumberFormat.getCurrencyInstance(localeID)
         holder.tvTotalHarga.text = formatRupiah.format(laporan.totalPenjualan)
 
-        // 4. Data Tambahan (Karena di Laporan tidak ada variabel struk & status, kita manfaatkan ID Firestore)
-        // Memotong ID agar tidak terlalu panjang di layar
-        val idPendek = if (laporan.id.length > 6) laporan.id.take(6).uppercase() else laporan.id
-        holder.tvNomorStruk.text = "TRX-$idPendek"
-        holder.tvStatus.text = "Selesai" // Transaksi yang masuk ke DB sudah pasti Selesai
+        holder.tvStatus.text = "Selesai"
     }
 
     override fun getItemCount(): Int {
         return listLaporan.size
     }
 
-    // ✨ Fungsi update menerima List<Laporan>
     fun updateData(newList: List<Laporan>) {
         listLaporan = newList
         notifyDataSetChanged()

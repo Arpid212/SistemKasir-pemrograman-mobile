@@ -31,9 +31,7 @@ class CheckoutTunaiActivity : AppCompatActivity() {
 
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // Tangkap tipe data dasar (Double)
         val totalTagihan = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
-
         val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
         tvTotalBayar.text = formatRupiah.format(totalTagihan).replace("Rp", "Rp ")
 
@@ -60,6 +58,7 @@ class CheckoutTunaiActivity : AppCompatActivity() {
                 }
             }
         })
+
         btnCetakStruk.setOnClickListener {
             val bayar = etNominalBayar.text.toString().toDoubleOrNull() ?: 0.0
             simpanTransaksiKeFirestore(totalTagihan, bayar)
@@ -70,19 +69,19 @@ class CheckoutTunaiActivity : AppCompatActivity() {
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
+        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf()
 
         val rincianPesanan = arrayListOf<Map<String, Any>>()
         for (i in listNama.indices) {
-            rincianPesanan.add(
-                mapOf(
-                    "nama" to listNama[i],
-                    "harga" to listHarga[i],
-                    "kuantitas" to listQty[i]
-                )
+            val item = hashMapOf<String, Any>(
+                "nama" to listNama[i],
+                "harga" to listHarga[i],
+                "kuantitas" to listQty[i],
+                "foto" to if (i < listFoto.size) listFoto[i] else "" // Foto disimpan dengan aman
             )
+            rincianPesanan.add(item)
         }
 
-        // Ambil nama kasir dari SharedPreferences
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
         val namaKasirAktif = sharedPref.getString("NAMA_PENGGUNA", "Kasir Tidak Dikenal")
         val kembalian = bayar - totalTagihan
@@ -100,7 +99,6 @@ class CheckoutTunaiActivity : AppCompatActivity() {
         db.collection("Transaksi")
             .add(dataTransaksi)
             .addOnSuccessListener {
-                // Proses update stok produk ke Firestore
                 for (i in listNama.indices) {
                     val namaProduk = listNama[i]
                     val qtyTerbeli = listQty[i]
@@ -119,15 +117,15 @@ class CheckoutTunaiActivity : AppCompatActivity() {
 
                 Toast.makeText(this, "Transaksi Tunai Berhasil Disimpan!", Toast.LENGTH_SHORT).show()
 
-                // PERBAIKAN UTAMA: Arahkan Intent menuju halaman Struk Pembayaran
-                val intentStruk = Intent(this, CetakStrukActivity::class.java)
-                intentStruk.putExtra("TOTAL_TAGIHAN", totalTagihan)
-                intentStruk.putExtra("NOMINAL_BAYAR", bayar)
-                intentStruk.putExtra("KEMBALIAN", kembalian)
-                intentStruk.putExtra("METODE_PEMBAYARAN", "Tunai")
-                intentStruk.putStringArrayListExtra("LIST_NAMA", listNama)
-                intentStruk.putExtra("LIST_HARGA", listHarga)
-                intentStruk.putIntegerArrayListExtra("LIST_QTY", listQty)
+                val intentStruk = Intent(this, CetakStrukActivity::class.java).apply {
+                    putExtra("TOTAL_TAGIHAN", totalTagihan)
+                    putExtra("NOMINAL_BAYAR", bayar)
+                    putExtra("KEMBALIAN", kembalian)
+                    putExtra("METODE_PEMBAYARAN", "Tunai")
+                    putStringArrayListExtra("LIST_NAMA", listNama)
+                    putExtra("LIST_HARGA", listHarga)
+                    putIntegerArrayListExtra("LIST_QTY", listQty)
+                }
 
                 startActivity(intentStruk)
                 finish()

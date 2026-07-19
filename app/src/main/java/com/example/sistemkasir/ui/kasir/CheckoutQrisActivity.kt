@@ -30,14 +30,15 @@ class CheckoutQrisActivity : AppCompatActivity() {
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
+        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf() // ✨ Tangkap foto dari Intent
         val totalAkhir = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
 
         val formatRupiah = NumberFormat.getNumberInstance(Locale("in", "ID"))
         tvTotalBayarQris.text = "Rp " + formatRupiah.format(totalAkhir).split(",")[0]
 
         btnVerifikasi.setOnClickListener {
-            // Ubah logika: Simpan dulu ke database, baru pindah halaman
-            simpanTransaksiQris(totalAkhir, listNama, listHarga, listQty)
+            // Meneruskan variabel listFoto ke fungsi simpan
+            simpanTransaksiQris(totalAkhir, listNama, listHarga, listQty, listFoto)
         }
     }
 
@@ -45,11 +46,18 @@ class CheckoutQrisActivity : AppCompatActivity() {
         totalTagihan: Double,
         listNama: ArrayList<String>,
         listHarga: DoubleArray,
-        listQty: ArrayList<Int>
+        listQty: ArrayList<Int>,
+        listFoto: ArrayList<String> // ✨ Parameter foto diterima di sini
     ) {
         val rincianPesanan = arrayListOf<Map<String, Any>>()
         for (i in listNama.indices) {
-            rincianPesanan.add(mapOf("nama" to listNama[i], "harga" to listHarga[i], "kuantitas" to listQty[i]))
+            val item = hashMapOf<String, Any>(
+                "nama" to listNama[i],
+                "harga" to listHarga[i],
+                "kuantitas" to listQty[i],
+                "foto" to if (i < listFoto.size) listFoto[i] else "" // ✨ Foto dimasukkan ke Firestore
+            )
+            rincianPesanan.add(item)
         }
 
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
@@ -57,17 +65,16 @@ class CheckoutQrisActivity : AppCompatActivity() {
 
         val dataTransaksi = hashMapOf(
             "waktu_transaksi" to com.google.firebase.Timestamp.now(),
-            "metode_pembayaran" to "QRIS", // Identitas QRIS
+            "metode_pembayaran" to "QRIS",
             "total_tagihan" to totalTagihan,
-            "nominal_bayar" to totalTagihan, // Uang pas
-            "kembalian" to 0.0, // Tidak ada kembalian
+            "nominal_bayar" to totalTagihan,
+            "kembalian" to 0.0,
             "rincian" to rincianPesanan,
             "nama_kasir" to namaKasirAktif
         )
 
         db.collection("Transaksi").add(dataTransaksi)
             .addOnSuccessListener {
-                // Proses pemotongan stok
                 for (i in listNama.indices) {
                     db.collection("Produk").whereEqualTo("nama", listNama[i]).get()
                         .addOnSuccessListener { hasil ->
