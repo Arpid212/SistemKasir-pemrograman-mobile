@@ -9,6 +9,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.content.Context
+import android.widget.Toast
 import com.example.sistemkasir.R
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.firebase.firestore.FirebaseFirestore
@@ -64,6 +65,7 @@ class CheckoutTunaiActivity : AppCompatActivity() {
             simpanTransaksiKeFirestore(totalTagihan, bayar)
         }
     }
+
     private fun simpanTransaksiKeFirestore(totalTagihan: Double, bayar: Double) {
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
@@ -83,26 +85,22 @@ class CheckoutTunaiActivity : AppCompatActivity() {
         // Ambil nama kasir dari SharedPreferences
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
         val namaKasirAktif = sharedPref.getString("NAMA_USER", "Kasir Tidak Dikenal")
+        val kembalian = bayar - totalTagihan
 
         val dataTransaksi = hashMapOf(
             "waktu_transaksi" to com.google.firebase.Timestamp.now(),
             "metode_pembayaran" to "Tunai",
             "total_tagihan" to totalTagihan,
             "nominal_bayar" to bayar,
-            "kembalian" to (bayar - totalTagihan),
+            "kembalian" to kembalian,
             "rincian" to rincianPesanan,
-            "nama_kasir" to namaKasirAktif // Menggunakan variabel dinamis dari session
+            "nama_kasir" to namaKasirAktif
         )
+
         db.collection("Transaksi")
             .add(dataTransaksi)
             .addOnSuccessListener {
-
-                // PERBAIKAN: Format teks struk dan kirim ke Printer Bluetooth
-                val struk = StringBuilder()
-                struk.append("==== NAMA TOKO ANDA ====\n")
-                struk.append("Kasir: Kasir Aktif\n")
-                struk.append("------------------------\n")
-
+                // Proses update stok produk ke Firestore
                 for (i in listNama.indices) {
                     val namaProduk = listNama[i]
                     val qtyTerbeli = listQty[i]
@@ -114,18 +112,28 @@ class CheckoutTunaiActivity : AppCompatActivity() {
                             for (dokumen in hasilPencarian) {
                                 val stokSekarang = dokumen.getLong("stok") ?: 0
                                 val stokBaru = stokSekarang - qtyTerbeli
-
-                                // Memperbarui stok langsung ke referensi ID dokumennya
                                 dokumen.reference.update("stok", stokBaru)
                             }
                         }
                 }
 
-                // Kembali ke Dashboard Kasir dan bersihkan tumpukan halaman (Clear Top)
-                val intent = Intent(this, DashboardKasirActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
+                Toast.makeText(this, "Transaksi Tunai Berhasil Disimpan!", Toast.LENGTH_SHORT).show()
+
+                // PERBAIKAN UTAMA: Arahkan Intent menuju halaman Struk Pembayaran
+                val intentStruk = Intent(this, CetakStrukActivity::class.java)
+                intentStruk.putExtra("TOTAL_TAGIHAN", totalTagihan)
+                intentStruk.putExtra("NOMINAL_BAYAR", bayar)
+                intentStruk.putExtra("KEMBALIAN", kembalian)
+                intentStruk.putExtra("METODE_PEMBAYARAN", "Tunai")
+                intentStruk.putStringArrayListExtra("LIST_NAMA", listNama)
+                intentStruk.putExtra("LIST_HARGA", listHarga)
+                intentStruk.putIntegerArrayListExtra("LIST_QTY", listQty)
+
+                startActivity(intentStruk)
                 finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, "Gagal menyimpan transaksi!", Toast.LENGTH_SHORT).show()
             }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.sistemkasir.ui.kasir
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import android.widget.Toast
@@ -16,27 +17,33 @@ class CheckoutQrisActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_checkout_qris)
 
-        // 1. Inisialisasi View dari XML kamu
         val toolbar = findViewById<MaterialToolbar>(R.id.toolbarQris)
         val tvTotalBayarQris = findViewById<TextView>(R.id.tvTotalBayarQris)
         val btnVerifikasi = findViewById<MaterialButton>(R.id.btnVerifikasiQris)
 
-        // 2. Aksi tombol kembali di kiri atas toolbar
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
 
-        // 3. Tangkap total tagihan dari CheckoutActivity
+        // Tangkap data dari Dashboard/Keranjang
+        val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
+        val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
+        val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
         val totalAkhir = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
 
-        // 4. Format dan tampilkan nominal tagihan ke rupiah
-        val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
-        tvTotalBayarQris.text = formatRupiah.format(totalAkhir).replace("Rp", "Rp ")
+        // Tampilkan di halaman QRIS (Format Rp)
+        val formatRupiah = NumberFormat.getNumberInstance(Locale("in", "ID"))
+        tvTotalBayarQris.text = "Rp " + formatRupiah.format(totalAkhir).split(",")[0]
 
-        // 5. Aksi saat tombol VERIFIKASI PEMBAYARAN ditekan
         btnVerifikasi.setOnClickListener {
-            // Jalankan logika simpan transaksi atau cetak struk di sini
-            Toast.makeText(this, "Pembayaran QRIS Berhasil Diverifikasi!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Pembayaran Berhasil!", Toast.LENGTH_SHORT).show()
 
-            // Contoh: Menutup halaman dan kembali ke menu utama kasir
+            val intentStruk = Intent(this, CetakStrukActivity::class.java)
+            // Oper seluruh data ke kelas Struk
+            intentStruk.putExtra("TOTAL_TAGIHAN", totalAkhir)
+            intentStruk.putStringArrayListExtra("LIST_NAMA", listNama)
+            intentStruk.putExtra("LIST_HARGA", listHarga)
+            intentStruk.putIntegerArrayListExtra("LIST_QTY", listQty)
+
+            startActivity(intentStruk)
             finish()
         }
     }

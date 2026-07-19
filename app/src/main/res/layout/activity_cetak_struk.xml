@@ -59,23 +59,27 @@
                 android:background="#E0E0E0"
                 android:layout_marginVertical="16dp"/>
 
+            <!-- Bagian Baris Item Belanjaan Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
                 <TextView
+                    android:id="@+id/tvNamaItemStruk"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Item Menu 1"
                     android:textColor="#000000"/>
                 <TextView
+                    android:id="@+id/tvQtyItemStruk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="x2"
                     android:layout_marginEnd="24dp"
                     android:textColor="#000000"/>
                 <TextView
+                    android:id="@+id/tvHargaItemStruk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="40,000"
@@ -88,6 +92,7 @@
                 android:background="#E0E0E0"
                 android:layout_marginVertical="16dp"/>
 
+            <!-- Bagian Total Tagihan Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -100,6 +105,7 @@
                     android:textStyle="bold"
                     android:textColor="#000000"/>
                 <TextView
+                    android:id="@+id/tvTotalStruk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="84,700"
@@ -107,6 +113,7 @@
                     android:textColor="#000000"/>
             </LinearLayout>
 
+            <!-- Bagian Nominal Bayar Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -116,15 +123,17 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Tunai"
+                    android:text="QRIS / Lunas"
                     android:textColor="#666666"/>
                 <TextView
+                    android:id="@+id/tvTunaiStruk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="100,000"
                     android:textColor="#666666"/>
             </LinearLayout>
 
+            <!-- Bagian Uang Kembali Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -137,6 +146,7 @@
                     android:text="Kembali"
                     android:textColor="#666666"/>
                 <TextView
+                    android:id="@+id/tvKembaliStruk"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="15,300"

@@ -43,6 +43,9 @@
             android:name=".ui.kasir.CheckoutQrisActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.kasir.CetakStrukActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.admin.activity.TambahProdukActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
