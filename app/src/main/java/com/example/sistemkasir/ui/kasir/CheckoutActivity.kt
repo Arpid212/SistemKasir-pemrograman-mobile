@@ -88,7 +88,7 @@ class CheckoutActivity : AppCompatActivity() {
             intentTujuan.putStringArrayListExtra("LIST_NAMA", listNama)
             intentTujuan.putExtra("LIST_HARGA", listHarga)
             intentTujuan.putIntegerArrayListExtra("LIST_QTY", listQty)
-            intentTujuan.putStringArrayListExtra("LIST_FOTO", listFoto) // ✨ INI YANG DITAMBAHKAN
+            intentTujuan.putStringArrayListExtra("LIST_FOTO", listFoto)
 
             startActivity(intentTujuan)
         }

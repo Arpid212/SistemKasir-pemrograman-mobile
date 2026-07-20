@@ -30,7 +30,7 @@ class CheckoutQrisActivity : AppCompatActivity() {
         val listNama = intent.getStringArrayListExtra("LIST_NAMA") ?: arrayListOf()
         val listHarga = intent.getDoubleArrayExtra("LIST_HARGA") ?: doubleArrayOf()
         val listQty = intent.getIntegerArrayListExtra("LIST_QTY") ?: arrayListOf()
-        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf() // ✨ Tangkap foto dari Intent
+        val listFoto = intent.getStringArrayListExtra("LIST_FOTO") ?: arrayListOf()
         val totalAkhir = intent.getDoubleExtra("TOTAL_TAGIHAN", 0.0)
 
         val formatRupiah = NumberFormat.getNumberInstance(Locale("in", "ID"))
@@ -47,7 +47,7 @@ class CheckoutQrisActivity : AppCompatActivity() {
         listNama: ArrayList<String>,
         listHarga: DoubleArray,
         listQty: ArrayList<Int>,
-        listFoto: ArrayList<String> // ✨ Parameter foto diterima di sini
+        listFoto: ArrayList<String>
     ) {
         val rincianPesanan = arrayListOf<Map<String, Any>>()
         for (i in listNama.indices) {
@@ -55,7 +55,7 @@ class CheckoutQrisActivity : AppCompatActivity() {
                 "nama" to listNama[i],
                 "harga" to listHarga[i],
                 "kuantitas" to listQty[i],
-                "foto" to if (i < listFoto.size) listFoto[i] else "" // ✨ Foto dimasukkan ke Firestore
+                "foto" to if (i < listFoto.size) listFoto[i] else ""
             )
             rincianPesanan.add(item)
         }
