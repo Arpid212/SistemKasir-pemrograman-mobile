@@ -1,23 +1,28 @@
 package com.example.sistemkasir.ui.admin.fragment
 
 import android.app.AlertDialog
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sistemkasir.databinding.DialogProdukBinding
 import com.example.sistemkasir.databinding.FragmentProdukBinding
 import com.example.sistemkasir.model.Produk
 import com.example.sistemkasir.ui.admin.adapter.ProdukAdapter
+import com.example.sistemkasir.utils.ImageUtils
 import com.google.firebase.firestore.FirebaseFirestore
 
-// VERSI FALLBACK - tanpa Firebase Storage. Foto pakai input URL manual
-// (edtFoto). Gak nambah dependency baru sama sekali, aman kalau internet
-// buat resolve Storage lagi bermasalah.
+// VERSI FALLBACK - tanpa Firebase Storage. Foto disimpan sebagai
+// Base64 String langsung di field "foto" pada dokumen Firestore.
+// Dipakai karena Firebase Storage sekarang butuh plan Blaze (berbayar),
+// jadi tidak bisa dipakai di project Spark plan (free) untuk tugas kuliah.
 class ProdukFragment : Fragment() {
 
     private var _binding: FragmentProdukBinding? = null
@@ -25,6 +30,17 @@ class ProdukFragment : Fragment() {
     private val db = FirebaseFirestore.getInstance()
     private lateinit var adapter: ProdukAdapter
     private val kategoriList = arrayOf("Kopi", "Non-Kopi", "Makanan")
+
+    private var selectedImageUri: Uri? = null
+    private var imagePreview: ImageView? = null
+
+    private val galleryLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri?.let {
+                selectedImageUri = it
+                imagePreview?.setImageURI(it)
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -64,6 +80,14 @@ class ProdukFragment : Fragment() {
 
     private fun tampilkanDialog(docId: String? = null, produkLama: Produk? = null) {
         val form = DialogProdukBinding.inflate(layoutInflater)
+
+        selectedImageUri = null
+        imagePreview = form.imgPreview
+
+        form.btnPilihFoto.setOnClickListener {
+            galleryLauncher.launch("image/*")
+        }
+
         form.spKategori.adapter = ArrayAdapter(
             requireContext(), android.R.layout.simple_spinner_dropdown_item, kategoriList
         )
@@ -73,7 +97,12 @@ class ProdukFragment : Fragment() {
             form.edtHarga.setText(it.harga.toString())
             form.edtStok.setText(it.stok.toString())
             form.edtDeskripsi.setText(it.deskripsi)
-            form.edtFoto.setText(it.foto)
+
+            val bitmap = ImageUtils.base64ToBitmap(it.foto)
+            if (bitmap != null) {
+                form.imgPreview.setImageBitmap(bitmap)
+            }
+
             form.spKategori.setSelection(kategoriList.indexOf(it.kategori).coerceAtLeast(0))
         }
 
@@ -90,7 +119,6 @@ class ProdukFragment : Fragment() {
             val harga = form.edtHarga.text.toString().toDoubleOrNull()
             val stok = form.edtStok.text.toString().toIntOrNull()
             val deskripsi = form.edtDeskripsi.text.toString().trim()
-            val foto = form.edtFoto.text.toString().trim()
             val kategori = form.spKategori.selectedItem.toString()
 
             if (nama.isEmpty() || harga == null || stok == null) {
@@ -98,9 +126,25 @@ class ProdukFragment : Fragment() {
                 return@setOnClickListener
             }
 
+            //foto baru dipilih dari galeri
+            val fotoValue: String? = when {
+                selectedImageUri != null -> ImageUtils.uriToBase64(requireContext(), selectedImageUri!!)
+                docId != null -> produkLama?.foto
+                else -> null
+            }
+
+            if (fotoValue.isNullOrEmpty()) {
+                Toast.makeText(requireContext(), "Pilih foto terlebih dahulu", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val data = hashMapOf<String, Any>(
-                "nama" to nama, "harga" to harga, "stok" to stok,
-                "deskripsi" to deskripsi, "kategori" to kategori, "foto" to foto
+                "nama" to nama,
+                "harga" to harga,
+                "stok" to stok,
+                "deskripsi" to deskripsi,
+                "kategori" to kategori,
+                "foto" to fotoValue
             )
 
             val tugas = if (docId == null) db.collection("Produk").add(data)

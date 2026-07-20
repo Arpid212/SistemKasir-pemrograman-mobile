@@ -12,6 +12,8 @@ import com.example.sistemkasir.model.Produk
 import java.text.NumberFormat
 import java.util.Locale
 
+import com.example.sistemkasir.utils.ImageUtils
+
 class KatalogProdukAdapter(
     private var listProduk: List<Produk>,
     private val onItemClick: (Produk) -> Unit
@@ -31,11 +33,23 @@ class KatalogProdukAdapter(
             tvHarga.text = formatRupiah.format(produk.harga).replace("Rp", "Rp ")
 
             if (!produk.foto.isNullOrEmpty()) {
-                Glide.with(itemView.context)
-                    .load(produk.foto)
-                    .into(imgFoto)
+
+                if (produk.foto.startsWith("http")) {
+                    // Produk lama (URL)
+                    Glide.with(itemView.context)
+                        .load(produk.foto)
+                        .into(imgFoto)
+                } else {
+                    // Produk baru (Base64)
+                    val bitmap = ImageUtils.base64ToBitmap(produk.foto)
+                    if (bitmap != null) {
+                        imgFoto.setImageBitmap(bitmap)
+                    } else {
+                        imgFoto.setImageResource(android.R.drawable.ic_menu_gallery)
+                    }
+                }
+
             } else {
-                // Gambar fallback jika URL foto kosong
                 imgFoto.setImageResource(android.R.drawable.ic_menu_gallery)
             }
 

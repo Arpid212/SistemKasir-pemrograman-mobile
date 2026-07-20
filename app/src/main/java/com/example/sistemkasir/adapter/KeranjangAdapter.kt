@@ -12,6 +12,8 @@ import com.example.sistemkasir.model.ItemKeranjang
 import java.text.NumberFormat
 import java.util.Locale
 
+import com.example.sistemkasir.utils.ImageUtils
+
 class KeranjangAdapter(
     private var listKeranjang: List<ItemKeranjang>
 ) : RecyclerView.Adapter<KeranjangAdapter.KeranjangViewHolder>() {
@@ -33,13 +35,26 @@ class KeranjangAdapter(
             tvHarga.text = formatRupiah.format(totalHargaItem).replace("Rp", "Rp ")
 
             if (!item.produk.foto.isNullOrEmpty()) {
-                Glide.with(itemView.context)
-                    .load(item.produk.foto)
-                    .into(imgFoto)
+
+                if (item.produk.foto.startsWith("http")) {
+                    // Produk lama (URL)
+                    Glide.with(itemView.context)
+                        .load(item.produk.foto)
+                        .into(imgFoto)
+                } else {
+                    // Produk baru (Base64)
+                    val bitmap = ImageUtils.base64ToBitmap(item.produk.foto)
+                    if (bitmap != null) {
+                        imgFoto.setImageBitmap(bitmap)
+                    } else {
+                        imgFoto.setImageResource(android.R.drawable.ic_menu_gallery)
+                    }
+                }
+
             } else {
-                // Jika URL foto kosong dari database, pasang gambar default bawaan Android
                 imgFoto.setImageResource(android.R.drawable.ic_menu_gallery)
             }
+
         }
     }
 

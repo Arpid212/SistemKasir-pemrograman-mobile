@@ -3,12 +3,11 @@ package com.example.sistemkasir.ui.admin.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.example.sistemkasir.databinding.ItemProdukBinding
 import com.example.sistemkasir.model.Produk
+import com.example.sistemkasir.utils.ImageUtils
 import java.text.NumberFormat
 import java.util.Locale
-
 
 class ProdukAdapter(
     private var daftar: List<Pair<String, Produk>>,
@@ -26,13 +25,17 @@ class ProdukAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val (docId, produk) = daftar[position]
         val format = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
+
         holder.binding.tvNama.text = produk.nama
         holder.binding.tvHarga.text = format.format(produk.harga)
         holder.binding.tvStok.text = "Stok: ${produk.stok}"
 
-        Glide.with(holder.itemView)
-            .load(produk.foto.ifEmpty { null })
-            .into(holder.binding.ivFoto)
+        val bitmap = ImageUtils.base64ToBitmap(produk.foto)
+        if (bitmap != null) {
+            holder.binding.ivFoto.setImageBitmap(bitmap)
+        } else {
+            holder.binding.ivFoto.setImageResource(android.R.drawable.ic_menu_gallery)
+        }
 
         holder.binding.btnEdit.setOnClickListener { onEdit(docId, produk) }
         holder.binding.btnHapus.setOnClickListener { onDelete(docId, produk) }
