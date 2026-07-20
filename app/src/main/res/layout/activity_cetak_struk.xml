@@ -62,7 +62,6 @@
                 android:background="#E0E0E0"
                 android:layout_marginVertical="16dp"/>
 
-            <!-- Wadah Kosong untuk Diisi Item Belanjaan dari Kotlin -->
             <LinearLayout
                 android:id="@+id/llRincianPesanan"
                 android:layout_width="match_parent"
@@ -75,7 +74,6 @@
                 android:background="#E0E0E0"
                 android:layout_marginVertical="16dp"/>
 
-            <!-- Bagian Total Tagihan Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -96,7 +94,6 @@
                     android:textColor="#000000"/>
             </LinearLayout>
 
-            <!-- Bagian Nominal Bayar Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -117,7 +114,6 @@
                     android:textColor="#666666"/>
             </LinearLayout>
 
-            <!-- Bagian Uang Kembali Dinamis -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -150,7 +146,6 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Kumpulan Tombol Aksi Bawah -->
     <LinearLayout
         android:id="@+id/bottomActionContainer"
         android:layout_width="match_parent"

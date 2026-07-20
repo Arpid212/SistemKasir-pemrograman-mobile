@@ -32,7 +32,6 @@ class KeranjangAdapter(
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(totalHargaItem).replace("Rp", "Rp ")
 
-            // ✨ PERBAIKAN: Load Gambar Menggunakan Glide agar UI Layout Tidak Bergeser ke Tengah
             if (!item.produk.foto.isNullOrEmpty()) {
                 Glide.with(itemView.context)
                     .load(item.produk.foto)
