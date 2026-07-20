@@ -13,8 +13,6 @@
         android:layout_height="wrap_content"
         android:hint="Nama lengkap" />
 
-    <!-- Cuma muncul pas mode Update: nama-nama bisa diubah, tapi email & PIN
-         dikunci (read-only) karena itu kredensial login yang sudah dipakai -->
     <LinearLayout
         android:id="@+id/groupKredensial"
         android:layout_width="match_parent"

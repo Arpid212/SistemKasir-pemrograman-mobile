@@ -58,7 +58,6 @@ class DashboardKasirActivity : AppCompatActivity() {
 
         pantauDataDariAdmin()
 
-        // --- FILTER KATEGORI ---
         chipGroup.setOnCheckedStateChangeListener { _, checkedIds ->
             val selectedChipId = checkedIds.firstOrNull()
             if (selectedChipId == null) {
@@ -77,7 +76,7 @@ class DashboardKasirActivity : AppCompatActivity() {
             }
         }
 
-        // --- LOGIKA TOMBOL + GLOBAL ---
+
         btnPlusGlobal.setOnClickListener {
             if (itemAktif == null && listKeranjang.isNotEmpty()) {
                 itemAktif = listKeranjang.last()
@@ -88,7 +87,6 @@ class DashboardKasirActivity : AppCompatActivity() {
             } ?: Toast.makeText(this, "Silakan pilih produk dulu!", Toast.LENGTH_SHORT).show()
         }
 
-        // --- LOGIKA TOMBOL - GLOBAL ---
         btnMinusGlobal.setOnClickListener {
             if (itemAktif == null && listKeranjang.isNotEmpty()) {
                 itemAktif = listKeranjang.last()
@@ -104,7 +102,6 @@ class DashboardKasirActivity : AppCompatActivity() {
             } ?: Toast.makeText(this, "Keranjang kosong!", Toast.LENGTH_SHORT).show()
         }
 
-        // Bluetooth Printer Thread
         val macAddressPrinter = "00:11:22:33:44:55"
         Thread {
             val terhubung = com.example.sistemkasir.utils.PrinterUtil.connectBluetooth(macAddressPrinter)
@@ -117,14 +114,11 @@ class DashboardKasirActivity : AppCompatActivity() {
             }
         }.start()
 
-        // --- TOMBOL CHECKOUT (SUDAH DIPERBAIKI) ---
         btnCheckout.setOnClickListener {
             if (listKeranjang.isEmpty()) {
                 Toast.makeText(this, "Keranjang masih kosong!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-
-            // Menampung semua data item secara lengkap
             val listId = ArrayList<Int>()
             val listNama = ArrayList<String>()
             val listHarga = ArrayList<Double>()
@@ -133,11 +127,11 @@ class DashboardKasirActivity : AppCompatActivity() {
             val listKategori = ArrayList<String>()
 
             for (item in listKeranjang) {
-                listId.add(item.produk.id)          // Mengunci ID asli agar quantity tidak tertukar
+                listId.add(item.produk.id)
                 listNama.add(item.produk.nama)
                 listHarga.add(item.produk.harga)
                 listQty.add(item.kuantitas)
-                listFoto.add(item.produk.foto)      // Menyertakan link foto agar UI tidak bergeser
+                listFoto.add(item.produk.foto)
                 listKategori.add(item.produk.kategori)
             }
 
@@ -152,7 +146,6 @@ class DashboardKasirActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
-        // Tambahkan baris ini di dalam onCreate()
         val btnKeluar = findViewById<Button>(R.id.btnKeluar)
 
         btnKeluar.setOnClickListener {
@@ -218,14 +211,10 @@ class DashboardKasirActivity : AppCompatActivity() {
     }
 
     private fun prosesLogout() {
-        // 1. Hapus sesi di Firebase Authentication
         FirebaseAuth.getInstance().signOut()
-
-        // 2. Hapus memori nama pengguna di SharedPreferences
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
         sharedPref.edit().clear().apply()
 
-        // 3. Kembali ke halaman Login dan hapus tumpukan halaman Kasir
         val intent = Intent(this, LoginActivity::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)

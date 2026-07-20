@@ -6,7 +6,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sistemkasir.databinding.ItemKasirBinding
 import com.example.sistemkasir.model.Pengguna
 
-// daftar-nya List<Pair<docId, Pengguna>>, sama pola kayak ProdukAdapter
+
 class KasirAdapter(
     private var daftar: List<Pair<String, Pengguna>>,
     private val onEdit: (String, Pengguna) -> Unit,

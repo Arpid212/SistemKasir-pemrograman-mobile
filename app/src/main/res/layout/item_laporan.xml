@@ -16,7 +16,6 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- ID Transaksi (Main Title) -->
         <TextView
             android:id="@+id/tvNomorStruk"
             android:layout_width="0dp"
@@ -29,7 +28,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Subtitle: Daftar Menu -->
         <TextView
             android:id="@+id/tvDetailPesanan"
             android:layout_width="0dp"
@@ -44,7 +42,6 @@
             app:layout_constraintStart_toStartOf="@id/tvNomorStruk"
             app:layout_constraintTop_toBottomOf="@id/tvNomorStruk" />
 
-        <!-- Tanggal & Jam -->
         <TextView
             android:id="@+id/tvTanggal"
             android:layout_width="0dp"
@@ -56,7 +53,6 @@
             app:layout_constraintStart_toStartOf="@id/tvNomorStruk"
             app:layout_constraintTop_toBottomOf="@id/tvDetailPesanan" />
 
-        <!-- Baris Keterangan Metode & Status -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -92,7 +88,6 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- Total Harga di Kanan -->
         <TextView
             android:id="@+id/tvTotalHarga"
             android:layout_width="wrap_content"

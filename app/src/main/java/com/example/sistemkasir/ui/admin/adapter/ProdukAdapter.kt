@@ -9,11 +9,7 @@ import com.example.sistemkasir.model.Produk
 import java.text.NumberFormat
 import java.util.Locale
 
-// daftar-nya List<Pair<docId, Produk>> - docId dibawa terus biar edit/hapus
-// gak perlu nyari-nyari lagi ke Firestore
-//
-// Butuh Glide buat load gambar dari URL (tambahkan di app/build.gradle.kts kalau belum ada):
-// implementation("com.github.bumptech.glide:glide:4.16.0")
+
 class ProdukAdapter(
     private var daftar: List<Pair<String, Produk>>,
     private val onEdit: (String, Produk) -> Unit,

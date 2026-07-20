@@ -6,7 +6,6 @@
     android:background="#FFFFFF"
     android:orientation="vertical">
 
-    <!-- Area daftar menu -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvProduk"
         android:layout_width="match_parent"
@@ -15,7 +14,6 @@
         android:paddingHorizontal="24dp"
         android:paddingTop="8dp" />
 
-    <!-- Tombol tambah menu diselaraskan dengan gaya tombol "MASUK" di halaman Login -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnTambahProduk"
         android:layout_width="match_parent"

@@ -34,7 +34,6 @@ class CetakStrukActivity : AppCompatActivity() {
         val nominalBayar = intent.getDoubleExtra("NOMINAL_BAYAR", totalAkhir)
         val kembalian = intent.getDoubleExtra("KEMBALIAN", 0.0)
 
-        // Menggunakan formatter persis seperti kode awal Anda
         val formatter = NumberFormat.getNumberInstance(Locale("in", "ID"))
 
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
@@ -44,11 +43,9 @@ class CetakStrukActivity : AppCompatActivity() {
         val tanggalSekarang = sdf.format(Date())
         val kodeStruk = System.currentTimeMillis().toString()
 
-        // 1. Set Info Header
         findViewById<TextView>(R.id.tvInfoStruk).text =
             "Kode Struk : $kodeStruk\nTanggal : $tanggalSekarang\nKasir : $namaKasir"
 
-        // 2. Set Info Total & Metode (Sesuai gaya angka Anda)
         findViewById<TextView>(R.id.tvTotalStruk).text = formatter.format(totalAkhir.toInt())
         findViewById<TextView>(R.id.tvLabelMetode).text = metodePembayaran
 
@@ -61,7 +58,6 @@ class CetakStrukActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvKembaliStruk).text = formatter.format(kembalian.toInt())
         }
 
-        // 3. ✨ INI GANTI DARI STRINGBUILDER MENJADI RENDER DINAMIS ✨
         val wadahRincian = findViewById<LinearLayout>(R.id.llRincianPesanan)
 
         for (i in listNama.indices) {
@@ -98,12 +94,10 @@ class CetakStrukActivity : AppCompatActivity() {
             wadahRincian.addView(barisItem)
         }
 
-        // 4. Logika Tombol
         findViewById<Button>(R.id.btnCetakPrinter).setOnClickListener {
             Toast.makeText(this, "Mengirim data ke Printer...", Toast.LENGTH_SHORT).show()
         }
 
-        // Tombol reset keranjang yang wajib ada
         findViewById<Button>(R.id.btnSelesai).setOnClickListener {
             val intentDashboard = Intent(this, DashboardKasirActivity::class.java)
             intentDashboard.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK

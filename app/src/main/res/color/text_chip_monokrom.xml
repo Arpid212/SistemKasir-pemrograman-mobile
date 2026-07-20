@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Teks putih saat chip diklik/dipilih -->
     <item android:state_checked="true" android:color="#FFFFFF" />
 
-    <!-- Teks hitam saat chip tidak dipilih -->
     <item android:color="#000000" />
 </selector>
