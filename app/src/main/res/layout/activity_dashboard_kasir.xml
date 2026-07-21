@@ -18,7 +18,7 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-    <!-- Tombol Keluar (Baru Ditambahkan) -->
+
     <Button
         android:id="@+id/btnKeluar"
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/tvGreeting"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/tvGreeting" />
-    <!-- Area Kategori Produk -->
+
     <HorizontalScrollView
         android:id="@+id/scrollCategories"
         android:layout_width="match_parent"
@@ -90,7 +90,6 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- Katalog Produk -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvKatalogProduk"
         android:layout_width="match_parent"
@@ -105,7 +104,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scrollCategories" />
 
-    <!-- Bottom Bar Checkout -->
     <LinearLayout
         android:id="@+id/bottomBar"
         android:layout_width="match_parent"
@@ -124,7 +122,6 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Card Plus Minus -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
@@ -168,7 +165,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Card Total Angka -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -195,7 +191,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
-        <!-- Tombol Checkout Hitam -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCheckout"
             android:layout_width="wrap_content"

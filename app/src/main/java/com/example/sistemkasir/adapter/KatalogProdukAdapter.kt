@@ -30,7 +30,6 @@ class KatalogProdukAdapter(
             val formatRupiah = NumberFormat.getCurrencyInstance(Locale("in", "ID"))
             tvHarga.text = formatRupiah.format(produk.harga).replace("Rp", "Rp ")
 
-            // ✨ PERBAIKAN: Tambahkan logika Glide di sini
             if (!produk.foto.isNullOrEmpty()) {
                 Glide.with(itemView.context)
                     .load(produk.foto)
