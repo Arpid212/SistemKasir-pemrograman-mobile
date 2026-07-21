@@ -8,7 +8,6 @@
     android:background="#FFFFFF"
     tools:context=".ui.admin.DashboardAdminActivity">
 
-    <!-- Judul Halaman -->
     <TextView
         android:id="@+id/txtJudul"
         android:layout_width="0dp"
@@ -23,7 +22,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Tombol Keluar -->
     <Button
         android:id="@+id/btnKeluar"
         android:layout_width="wrap_content"
@@ -57,8 +55,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <!-- Tombol Dash -->
-            <!-- Lebar diubah jadi wrap_content dan diberi padding agar lega -->
+
             <Button
                 android:id="@+id/btnDashboard"
                 android:layout_width="wrap_content"
@@ -73,7 +70,6 @@
                 app:backgroundTint="#F5F5F5"
                 app:cornerRadius="50dp" />
 
-            <!-- Tombol Menu -->
             <Button
                 android:id="@+id/btnProduk"
                 android:layout_width="wrap_content"
@@ -88,7 +84,6 @@
                 app:backgroundTint="#000000"
                 app:cornerRadius="50dp" />
 
-            <!-- Tombol Laporan (Teks sudah diubah) -->
             <Button
                 android:id="@+id/btnLaporan"
                 android:layout_width="wrap_content"
@@ -103,7 +98,6 @@
                 app:backgroundTint="#000000"
                 app:cornerRadius="50dp" />
 
-            <!-- Tombol Kasir -->
             <Button
                 android:id="@+id/btnKasir"
                 android:layout_width="wrap_content"
@@ -119,7 +113,6 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Wadah Fragment -->
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="0dp"

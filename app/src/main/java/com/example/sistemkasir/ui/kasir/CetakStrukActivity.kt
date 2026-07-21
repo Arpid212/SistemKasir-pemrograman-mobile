@@ -37,7 +37,7 @@ class CetakStrukActivity : AppCompatActivity() {
         val formatter = NumberFormat.getNumberInstance(Locale("in", "ID"))
 
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
-        val namaKasir = sharedPref.getString("NAMA_PENGGUNA", "Kasir")
+        val namaKasir = sharedPref.getString("NAMA_USER", "Kasir")
 
         val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val tanggalSekarang = sdf.format(Date())

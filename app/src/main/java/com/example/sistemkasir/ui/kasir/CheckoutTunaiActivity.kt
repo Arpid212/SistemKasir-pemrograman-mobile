@@ -83,7 +83,7 @@ class CheckoutTunaiActivity : AppCompatActivity() {
         }
 
         val sharedPref = getSharedPreferences("SesiSistemKasir", Context.MODE_PRIVATE)
-        val namaKasirAktif = sharedPref.getString("NAMA_PENGGUNA", "Kasir Tidak Dikenal")
+        val namaKasirAktif = sharedPref.getString("NAMA_USER", "Kasir Tidak Dikenal")
         val kembalian = bayar - totalTagihan
 
         val dataTransaksi = hashMapOf(

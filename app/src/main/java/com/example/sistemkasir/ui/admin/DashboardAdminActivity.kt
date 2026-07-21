@@ -63,13 +63,10 @@ class DashboardAdminActivity : AppCompatActivity() {
             replaceFragment(KasirFragment())
             updateWarnaTombol(btnKasir)
         }
-
-        // Logika Tombol Keluar
         btnKeluar.setOnClickListener {
             tampilkanDialogKeluar()
         }
 
-        // Tampilan default saat pertama kali dibuka
         if (savedInstanceState == null) {
             txtJudul.text = "Dashboard"
             replaceFragment(DashboardFragment())
@@ -77,18 +74,14 @@ class DashboardAdminActivity : AppCompatActivity() {
         }
     }
 
-    // Fungsi untuk mengubah warna tombol secara dinamis
     private fun updateWarnaTombol(tombolAktif: Button) {
-        // Masukkan semua tombol ke dalam sebuah Array
         val semuaTombol = arrayOf(btnDashboard, btnProduk, btnLaporan, btnKasir)
 
         for (tombol in semuaTombol) {
             if (tombol == tombolAktif) {
-                // Style untuk tombol yang sedang AKTIF (Hitam, Teks Putih)
                 tombol.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#000000"))
                 tombol.setTextColor(Color.parseColor("#FFFFFF"))
             } else {
-                // Style untuk tombol TIDAK AKTIF (Abu-abu, Teks Hitam)
                 tombol.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#F5F5F5"))
                 tombol.setTextColor(Color.parseColor("#000000"))
             }
