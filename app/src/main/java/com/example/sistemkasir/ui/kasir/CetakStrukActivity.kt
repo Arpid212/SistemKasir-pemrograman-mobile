@@ -15,6 +15,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.sistemkasir.utils.PrinterUtil
 
 class CetakStrukActivity : AppCompatActivity() {
 
@@ -95,7 +96,47 @@ class CetakStrukActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnCetakPrinter).setOnClickListener {
-            Toast.makeText(this, "Mengirim data ke Printer...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Memproses data Printer...", Toast.LENGTH_SHORT).show()
+            val sb = StringBuilder()
+            sb.append("Toko Kasir ADAN\n") //
+            sb.append("--------------------------------\n")
+            sb.append("Kode   : $kodeStruk\n")
+            sb.append("Kasir  : $namaKasir\n")
+            sb.append("Tanggal: $tanggalSekarang\n")
+            sb.append("--------------------------------\n")
+            for (i in listNama.indices) {
+                val namaBarang = listNama[i]
+                val qty = listQty[i]
+                val harga = listHarga[i]
+                val subtotal = harga * qty
+                sb.append("$namaBarang\n")
+                sb.append("x$qty           Rp ${formatter.format(subtotal.toInt())}\n")
+            }
+
+            sb.append("--------------------------------\n")
+            sb.append("Total  : Rp ${formatter.format(totalAkhir.toInt())}\n")
+            sb.append("Bayar  : Rp ${if (metodePembayaran == "QRIS") "LUNAS" else formatter.format(nominalBayar.toInt())}\n")
+            if (metodePembayaran != "QRIS") {
+                sb.append("Kembali: Rp ${formatter.format(kembalian.toInt())}\n")
+            }
+            sb.append("--------------------------------\n")
+            sb.append("Terima kasih atas kunjungan Anda\n\n\n")
+
+            val teksStruk = sb.toString()
+
+            val berhasilCetak = PrinterUtil.print(teksStruk)
+
+            if (berhasilCetak) {
+                Toast.makeText(this, "Struk berhasil dicetak!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Printer tidak terhubung! Mengalihkan ke Dashboard...", Toast.LENGTH_LONG).show()
+
+                PrinterUtil.putusKoneksi()
+                val intentDashboard = Intent(this@CetakStrukActivity, DashboardKasirActivity::class.java)
+                intentDashboard.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intentDashboard)
+                finish()
+            }
         }
 
         findViewById<Button>(R.id.btnSelesai).setOnClickListener {

@@ -50,7 +50,6 @@ class KasirFragment : Fragment() {
         binding.btnTambahPegawai.setOnClickListener { tampilkanDialog() }
     }
 
-    // role di Firestore pakai kapital "Kasir" (konvensi dari LoginActivity Arvid)
     private fun muatKasir() {
         db.collection("Pengguna").whereEqualTo("role", "Kasir")
             .addSnapshotListener { snapshot, _ ->
@@ -73,7 +72,6 @@ class KasirFragment : Fragment() {
 
         form.edtNama.setText(penggunaLama?.nama ?: "")
 
-        // Email & PIN cuma ditampilkan (read-only) pas mode edit, gak ada pas nambah baru
         if (modeEdit) {
             form.groupKredensial.visibility = View.VISIBLE
             form.tvEmail.text = "Email: ${penggunaLama?.email}"
@@ -136,27 +134,21 @@ class KasirFragment : Fragment() {
         val pin = GeneratorUtil.generatePin()
 
         cariEmailUnik(emailDasar, 0) { emailUnik ->
-
-            // 1. Ambil konfigurasi Firebase utama
             val mainApp = FirebaseApp.getInstance()
             val options = mainApp.options
 
-            // 2. Buat "Aplikasi Kedua" sementara agar sesi Admin tidak tertimpa
             var secondaryApp = FirebaseApp.getApps(requireContext()).find { it.name == "SecondaryApp" }
             if (secondaryApp == null) {
                 secondaryApp = FirebaseApp.initializeApp(requireContext(), options, "SecondaryApp")
             }
 
-            // 3. Gunakan Auth dari Aplikasi Kedua untuk mendaftar
             val secondaryAuth = FirebaseAuth.getInstance(secondaryApp!!)
 
             secondaryAuth.createUserWithEmailAndPassword(emailUnik, pin)
                 .addOnSuccessListener {
 
-                    // Segera keluarkan sesi dari aplikasi kedua agar bersih
                     secondaryAuth.signOut()
 
-                    // 4. Simpan ke Firestore menggunakan instance utama (db)
                     val data = hashMapOf<String, Any>(
                         "nama" to nama, "email" to emailUnik, "pin" to pin, "role" to "Kasir"
                     )
